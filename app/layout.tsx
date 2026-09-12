@@ -7,6 +7,8 @@ import {
 } from "@clerk/nextjs";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
+import { ConvexClientProvider } from "@/components/convex-client-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,16 +35,26 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col">
         <ClerkProvider>
-          <header className="flex items-center justify-end gap-3 p-4 border-b">
-            <Show when="signed-out">
-              <SignInButton />
-              <SignUpButton />
-            </Show>
-            <Show when="signed-in">
-              <UserButton />
-            </Show>
-          </header>
-          {children}
+          <ConvexClientProvider>
+            <header className="flex items-center justify-between gap-3 p-4 border-b">
+              <Link href="/" className="font-semibold">
+                Debut
+              </Link>
+              <div className="flex items-center gap-3">
+                <Link href="/submit" className="text-sm font-medium">
+                  Submit
+                </Link>
+                <Show when="signed-out">
+                  <SignInButton />
+                  <SignUpButton />
+                </Show>
+                <Show when="signed-in">
+                  <UserButton />
+                </Show>
+              </div>
+            </header>
+            {children}
+          </ConvexClientProvider>
         </ClerkProvider>
       </body>
     </html>

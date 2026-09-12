@@ -1,0 +1,75 @@
+"use client";
+
+import { use } from "react";
+import Link from "next/link";
+import { useAuth, SignInButton } from "@clerk/nextjs";
+import { useMutation, useQuery } from "convex/react";
+import { ArrowUp } from "lucide-react";
+import { api } from "@/convex/_generated/api";
+import type { Doc } from "@/convex/_generated/dataModel";
+import { Button } from "@/components/ui/button";
+import { ProductLogo } from "@/components/product-logo";
+
+const PRICING_LABEL: Record<Doc<"products">["pricingType"], string> = {
+  free: "Free",
+  freemium: "Freemium",
+  paid: "Paid",
+};
+
+export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
+  const { slug } = use(params);
+  const product = useQuery(api.products.getBySlug, { slug });
+  const { isSignedIn } = useAuth();
+  const toggleUpvote = useMutation(api.upvotes.toggle);
+
+  if (product === undefined) {
+    return <p className="mx-auto max-w-2xl px-4 py-10 text-muted-foreground">Loading…</p>;
+  }
+
+  if (product === null) {
+    return <p className="mx-auto max-w-2xl px-4 py-10 text-muted-foreground">Product not found.</p>;
+  }
+
+  const upvoteButton = (
+    <Button
+      variant={product.viewerHasUpvoted ? "default" : "outline"}
+      onClick={() => toggleUpvote({ productId: product._id })}
+    >
+      <ArrowUp className="size-4" />
+      {product.upvoteCount} upvote{product.upvoteCount === 1 ? "" : "s"}
+    </Button>
+  );
+
+  return (
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 py-10">
+      <Link href="/" className="text-sm text-muted-foreground">
+        ← Back
+      </Link>
+
+      <div className="flex items-start gap-4">
+        <ProductLogo seed={product.logoSeed} name={product.name} size={64} />
+        <div className="flex-1">
+          <h1 className="text-2xl font-semibold">{product.name}</h1>
+          <p className="text-muted-foreground">{product.tagline}</p>
+        </div>
+        {isSignedIn ? upvoteButton : <SignInButton mode="modal">{upvoteButton}</SignInButton>}
+      </div>
+
+      <div className="flex items-center gap-3 text-sm">
+        <span className="rounded-full bg-secondary px-2 py-0.5 text-secondary-foreground">
+          {PRICING_LABEL[product.pricingType]}
+        </span>
+        <a
+          href={product.websiteUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium underline underline-offset-4"
+        >
+          Visit website ↗
+        </a>
+      </div>
+
+      <p className="whitespace-pre-wrap text-sm leading-relaxed">{product.description}</p>
+    </main>
+  );
+}

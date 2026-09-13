@@ -8,8 +8,10 @@ import {
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Plus, Trophy } from "lucide-react";
 import { ConvexClientProvider } from "@/components/convex-client-provider";
+import { HeaderSearch } from "@/components/header-search";
 import { Button } from "@/components/ui/button";
 import "./globals.css";
 
@@ -49,8 +51,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <ClerkProvider appearance={clerkAppearance}>
           <ConvexClientProvider>
-            <header className="sticky top-0 z-40 flex items-center justify-between gap-3 border-b border-border/70 bg-background/80 p-4 backdrop-blur-sm">
-              <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+            <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border/70 bg-background/80 p-4 backdrop-blur-sm">
+              <Link
+                href="/"
+                className="flex shrink-0 items-center gap-2 font-semibold tracking-tight"
+              >
                 <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
                   <defs>
                     <linearGradient id="spotlight-dot" x1="0" y1="0" x2="1" y2="1">
@@ -62,7 +67,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 </svg>
                 Debut
               </Link>
-              <div className="flex items-center gap-3">
+              <div className="flex flex-1 justify-center px-2">
+                <Suspense fallback={<div className="h-8 w-full max-w-sm" />}>
+                  <HeaderSearch />
+                </Suspense>
+              </div>
+              <div className="flex shrink-0 items-center gap-3">
                 <Link
                   href="/leaderboard"
                   className="hidden items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary sm:flex"

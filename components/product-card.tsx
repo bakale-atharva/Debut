@@ -27,8 +27,8 @@ export function ProductCard({
     logoUrl: string | undefined;
     badges: ProductBadges;
   };
-  rank: number;
-  isTop3: boolean;
+  rank?: number;
+  isTop3?: boolean;
 }) {
   const { isSignedIn } = useAuth();
   const toggleUpvote = useMutation(api.upvotes.toggle);
@@ -47,14 +47,16 @@ export function ProductCard({
 
   return (
     <div className="flex items-center gap-4 py-4">
-      <span
-        className={cn(
-          "w-6 shrink-0 text-right font-mono text-sm tabular-nums text-muted-foreground",
-          isTop3 && "text-signal-text font-semibold",
-        )}
-      >
-        {String(rank).padStart(2, "0")}
-      </span>
+      {rank !== undefined && (
+        <span
+          className={cn(
+            "w-6 shrink-0 text-right font-mono text-sm tabular-nums text-muted-foreground",
+            isTop3 && "text-signal-text font-semibold",
+          )}
+        >
+          {String(rank).padStart(2, "0")}
+        </span>
+      )}
       {product.logoUrl ? (
         <img
           src={product.logoUrl}

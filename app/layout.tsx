@@ -8,7 +8,7 @@ import {
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
-import { Plus, Trophy } from "lucide-react";
+import { Plus, Search, Trophy } from "lucide-react";
 import { ConvexClientProvider } from "@/components/convex-client-provider";
 import { Button } from "@/components/ui/button";
 import "./globals.css";
@@ -63,6 +63,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 Debut
               </Link>
               <div className="flex items-center gap-3">
+                <Link
+                  href="/search"
+                  className="hidden items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary sm:flex"
+                >
+                  <Search className="size-3.5" />
+                  Search
+                </Link>
                 <Link
                   href="/leaderboard"
                   className="hidden items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary sm:flex"

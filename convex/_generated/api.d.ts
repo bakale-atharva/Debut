@@ -16,6 +16,7 @@ import type * as lib_productView from "../lib/productView.js";
 import type * as lib_utils from "../lib/utils.js";
 import type * as products from "../products.js";
 import type * as rankings from "../rankings.js";
+import type * as search from "../search.js";
 import type * as seed from "../seed.js";
 import type * as topics from "../topics.js";
 import type * as upvotes from "../upvotes.js";
@@ -36,6 +37,7 @@ declare const fullApi: ApiFromModules<{
   "lib/utils": typeof lib_utils;
   products: typeof products;
   rankings: typeof rankings;
+  search: typeof search;
   seed: typeof seed;
   topics: typeof topics;
   upvotes: typeof upvotes;

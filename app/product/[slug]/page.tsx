@@ -12,6 +12,7 @@ import { ProductLogo } from "@/components/product-logo";
 import { ProductAwardBadge } from "@/components/product-award-badge";
 import { UserAvatar } from "@/components/user-avatar";
 import { CommentThread } from "@/components/comment-thread";
+import { SimilarProducts } from "@/components/similar-products";
 
 const PRICING_LABEL: Record<Doc<"products">["pricingType"], string> = {
   free: "Free",
@@ -156,6 +157,8 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
           ))}
         </div>
       )}
+
+      <SimilarProducts productId={product._id} />
 
       <div className="border-t border-border pt-6">
         <CommentThread productId={product._id} />

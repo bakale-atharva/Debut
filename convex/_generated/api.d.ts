@@ -10,9 +10,12 @@
 
 import type * as categories from "../categories.js";
 import type * as comments from "../comments.js";
+import type * as crons from "../crons.js";
 import type * as files from "../files.js";
+import type * as lib_productView from "../lib/productView.js";
 import type * as lib_utils from "../lib/utils.js";
 import type * as products from "../products.js";
+import type * as rankings from "../rankings.js";
 import type * as seed from "../seed.js";
 import type * as topics from "../topics.js";
 import type * as upvotes from "../upvotes.js";
@@ -27,9 +30,12 @@ import type {
 declare const fullApi: ApiFromModules<{
   categories: typeof categories;
   comments: typeof comments;
+  crons: typeof crons;
   files: typeof files;
+  "lib/productView": typeof lib_productView;
   "lib/utils": typeof lib_utils;
   products: typeof products;
+  rankings: typeof rankings;
   seed: typeof seed;
   topics: typeof topics;
   upvotes: typeof upvotes;

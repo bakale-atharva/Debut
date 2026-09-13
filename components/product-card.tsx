@@ -8,6 +8,7 @@ import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { ProductLogo } from "@/components/product-logo";
+import { ProductAwardBadge, type ProductBadges } from "@/components/product-award-badge";
 import { cn } from "@/lib/utils";
 
 const PRICING_LABEL: Record<Doc<"products">["pricingType"], string> = {
@@ -21,7 +22,11 @@ export function ProductCard({
   rank,
   isTop3,
 }: {
-  product: Doc<"products"> & { viewerHasUpvoted: boolean; logoUrl: string | undefined };
+  product: Doc<"products"> & {
+    viewerHasUpvoted: boolean;
+    logoUrl: string | undefined;
+    badges: ProductBadges;
+  };
   rank: number;
   isTop3: boolean;
 }) {
@@ -63,6 +68,7 @@ export function ProductCard({
         <p className="truncate text-[15px] font-medium">{product.name}</p>
         <p className="truncate text-sm text-muted-foreground">{product.tagline}</p>
       </Link>
+      <ProductAwardBadge badges={product.badges} compact className="hidden sm:inline-flex" />
       <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
         {PRICING_LABEL[product.pricingType]}
       </span>

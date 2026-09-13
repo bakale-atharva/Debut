@@ -70,6 +70,27 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
       </div>
 
       <p className="whitespace-pre-wrap text-sm leading-relaxed">{product.description}</p>
+
+      {(product.categories.length > 0 || product.topics.length > 0) && (
+        <div className="flex flex-wrap gap-1.5">
+          {product.categories.map((category) => (
+            <span
+              key={category._id}
+              className="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground"
+            >
+              {category.name}
+            </span>
+          ))}
+          {product.topics.map((topic) => (
+            <span
+              key={topic._id}
+              className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
+            >
+              #{topic.name}
+            </span>
+          ))}
+        </div>
+      )}
     </main>
   );
 }

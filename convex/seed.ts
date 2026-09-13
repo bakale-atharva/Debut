@@ -1,6 +1,8 @@
-import { internalMutation } from "./_generated/server";
+import { internalAction, internalMutation, internalQuery } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { v } from "convex/values";
+import { internal } from "./_generated/api";
 import { daysAgoInIST, slugify } from "./lib/utils";
 import { getOrCreateTopic } from "./topics";
 
@@ -114,6 +116,11 @@ interface SeedProduct {
   topics: string[];
   makerKeys: string[]; // first entry is the submitter
   featured?: boolean;
+  logoImageUrl: string; // Unsplash photo used as the product's icon
+}
+
+function unsplashIcon(photoId: string): string {
+  return `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=256&h=256&q=80`;
 }
 
 const PRODUCTS: SeedProduct[] = [
@@ -128,6 +135,7 @@ const PRODUCTS: SeedProduct[] = [
     topics: ["automation", "ai-agents", "productivity"],
     makerKeys: ["m1"],
     featured: true,
+    logoImageUrl: unsplashIcon("1618005182384-a83a8bd57fbe"),
   },
   {
     name: "PixelForge",
@@ -139,6 +147,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["design", "dev-tools"],
     topics: ["design-systems", "developer-tools", "branding"],
     makerKeys: ["m2"],
+    logoImageUrl: unsplashIcon("1557683316-973673baf926"),
   },
   {
     name: "TaskPilot",
@@ -150,6 +159,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["productivity", "saas"],
     topics: ["productivity", "remote-work"],
     makerKeys: ["m3"],
+    logoImageUrl: unsplashIcon("1620121692029-d088224ddc74"),
   },
   {
     name: "LedgerLoop",
@@ -161,6 +171,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["fintech"],
     topics: ["personal-finance", "automation"],
     makerKeys: ["m4"],
+    logoImageUrl: unsplashIcon("1618172193622-ae2d025f4032"),
   },
   {
     name: "SnapShip",
@@ -172,6 +183,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["dev-tools"],
     topics: ["developer-tools", "automation"],
     makerKeys: ["m5"],
+    logoImageUrl: unsplashIcon("1550859492-d5da9d8e45f3"),
   },
   {
     name: "MindGrove",
@@ -183,6 +195,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["education"],
     topics: ["learning", "habit-tracking"],
     makerKeys: ["m6"],
+    logoImageUrl: unsplashIcon("1614850523060-8da1d56ae167"),
   },
   {
     name: "PulseFit",
@@ -194,6 +207,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["health-fitness", "hardware"],
     topics: ["wearables", "health"],
     makerKeys: ["m7"],
+    logoImageUrl: unsplashIcon("1633613286848-e6f43bbafb8d"),
   },
   {
     name: "CopyCraft",
@@ -206,6 +220,7 @@ const PRODUCTS: SeedProduct[] = [
     topics: ["marketing-tools", "ai-agents", "branding"],
     makerKeys: ["m8"],
     featured: true,
+    logoImageUrl: unsplashIcon("1550684376-efcbd6e3f031"),
   },
   {
     name: "StackScope",
@@ -218,6 +233,7 @@ const PRODUCTS: SeedProduct[] = [
     topics: ["observability", "developer-tools"],
     makerKeys: ["m9"],
     featured: true,
+    logoImageUrl: unsplashIcon("1567359781514-3b964e2b04d6"),
   },
   {
     name: "BudgetBloom",
@@ -229,6 +245,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["fintech", "ai"],
     topics: ["personal-finance", "ai-agents"],
     makerKeys: ["m10"],
+    logoImageUrl: unsplashIcon("1634193295627-1cdddf751ebf"),
   },
   {
     name: "FormFlow",
@@ -240,6 +257,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["productivity", "saas"],
     topics: ["no-code", "productivity"],
     makerKeys: ["m11"],
+    logoImageUrl: unsplashIcon("1635776062127-d379bfcba9f8"),
   },
   {
     name: "VoxNote",
@@ -251,6 +269,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["productivity", "ai"],
     topics: ["voice-to-text", "productivity"],
     makerKeys: ["m12"],
+    logoImageUrl: unsplashIcon("1541701494587-cb58502866ab"),
   },
   {
     name: "GridPilot",
@@ -262,6 +281,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["dev-tools", "productivity"],
     topics: ["no-code", "developer-tools"],
     makerKeys: ["m13"],
+    logoImageUrl: unsplashIcon("1636955779321-819753cd1741"),
   },
   {
     name: "Lumen Desk",
@@ -273,6 +293,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["hardware", "productivity"],
     topics: ["wearables", "productivity", "habit-tracking"],
     makerKeys: ["m1"],
+    logoImageUrl: unsplashIcon("1618556450994-a6a128ef0d9d"),
   },
   {
     name: "ClauseCheck",
@@ -285,6 +306,7 @@ const PRODUCTS: SeedProduct[] = [
     topics: ["legal-tech", "ai-agents"],
     makerKeys: ["m2"],
     featured: true,
+    logoImageUrl: unsplashIcon("1620503374956-c942862f0372"),
   },
   {
     name: "RecipeRadar",
@@ -296,6 +318,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["health-fitness"],
     topics: ["health", "automation"],
     makerKeys: ["m3", "m7"],
+    logoImageUrl: unsplashIcon("1614851099175-e5b30eb6f696"),
   },
   {
     name: "BrandLoom",
@@ -307,6 +330,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["design", "marketing"],
     topics: ["branding", "design-systems", "marketing-tools"],
     makerKeys: ["m5", "m9"],
+    logoImageUrl: unsplashIcon("1620325867502-221cfb5faa5f"),
   },
   {
     name: "QueueSense",
@@ -318,6 +342,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["ai", "saas"],
     topics: ["customer-support", "ai-agents"],
     makerKeys: ["m2", "m11"],
+    logoImageUrl: unsplashIcon("1614624532983-4ce03382d63d"),
   },
   {
     name: "PathPeer",
@@ -329,6 +354,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["education", "saas"],
     topics: ["mentorship", "learning"],
     makerKeys: ["m6", "m1"],
+    logoImageUrl: unsplashIcon("1567095761054-7a02e69e5c43"),
   },
   {
     name: "ShelfSort",
@@ -340,6 +366,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["saas", "productivity"],
     topics: ["inventory", "automation"],
     makerKeys: ["m8", "m13"],
+    logoImageUrl: unsplashIcon("1617791160536-598cf32026fb"),
   },
   {
     name: "WaveDesk",
@@ -351,6 +378,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["productivity", "saas"],
     topics: ["remote-work", "productivity"],
     makerKeys: ["m4", "m10"],
+    logoImageUrl: unsplashIcon("1614036417651-efe5912149d8"),
   },
   {
     name: "NestNotes",
@@ -362,6 +390,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["design", "productivity"],
     topics: ["remote-work", "design-systems"],
     makerKeys: ["m12", "m3"],
+    logoImageUrl: unsplashIcon("1620641788421-7a1c342ea42e"),
   },
   {
     name: "TrailMint",
@@ -373,6 +402,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["health-fitness", "productivity"],
     topics: ["habit-tracking", "health"],
     makerKeys: ["m9", "m1"],
+    logoImageUrl: unsplashIcon("1516981879613-9f5da904015f"),
   },
   {
     name: "CircuitBox",
@@ -384,6 +414,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["hardware", "education"],
     topics: ["wearables", "learning"],
     makerKeys: ["m7", "m13"],
+    logoImageUrl: unsplashIcon("1550439062-609e1531270e"),
   },
   {
     name: "AdOrbit",
@@ -396,6 +427,7 @@ const PRODUCTS: SeedProduct[] = [
     topics: ["marketing-tools", "ai-agents", "automation"],
     makerKeys: ["m2", "m5", "m8"],
     featured: true,
+    logoImageUrl: unsplashIcon("1553356084-58ef4a67b2a7"),
   },
   {
     name: "Insightloop",
@@ -407,6 +439,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["ai", "marketing"],
     topics: ["customer-support", "ai-agents", "marketing-tools"],
     makerKeys: ["m10", "m11", "m12"],
+    logoImageUrl: unsplashIcon("1557682250-33bd709cbe85"),
   },
   {
     name: "Fernweh",
@@ -418,6 +451,7 @@ const PRODUCTS: SeedProduct[] = [
     categorySlugs: ["productivity", "education"],
     topics: ["learning", "remote-work"],
     makerKeys: ["m1", "m6", "m9"],
+    logoImageUrl: unsplashIcon("1618172193763-c511deb635ca"),
   },
 ];
 
@@ -607,6 +641,48 @@ export const seed = internalMutation({
       if (!hasComments) {
         await seedCommentsForProduct(ctx, product, productId, i, makerIdByKey);
       }
+    }
+  },
+});
+
+export const getProductBySlug = internalQuery({
+  args: { slug: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("products")
+      .withIndex("by_slug", (q) => q.eq("slug", args.slug))
+      .unique();
+  },
+});
+
+export const setProductLogo = internalMutation({
+  args: { productId: v.id("products"), storageId: v.id("_storage") },
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.productId, { logoStorageId: args.storageId });
+  },
+});
+
+/**
+ * Downloads each seeded product's Unsplash icon and stores it as its
+ * logoStorageId. Run after `seed`. Safe to re-run — skips products that
+ * already have a logo.
+ */
+export const seedLogos = internalAction({
+  args: {},
+  handler: async (ctx) => {
+    for (const product of PRODUCTS) {
+      const slug = slugify(product.name);
+      const existing = await ctx.runQuery(internal.seed.getProductBySlug, { slug });
+      if (!existing || existing.logoStorageId) continue;
+
+      const response = await fetch(product.logoImageUrl);
+      if (!response.ok) continue;
+      const blob = await response.blob();
+      const storageId = await ctx.storage.store(blob);
+      await ctx.runMutation(internal.seed.setProductLogo, {
+        productId: existing._id,
+        storageId,
+      });
     }
   },
 });

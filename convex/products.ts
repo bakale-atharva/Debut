@@ -8,6 +8,8 @@ import type { QueryCtx } from "./_generated/server";
 
 const MAX_CATEGORIES_PER_PRODUCT = 3;
 const MAX_TOPICS_PER_PRODUCT = 5;
+const MAX_MAKERS_PER_PRODUCT = 12;
+const MAX_GALLERY_IMAGES = 10;
 const FEATURED_COUNT = 5;
 
 async function withViewerUpvote(ctx: QueryCtx, product: Doc<"products">) {
@@ -23,6 +25,11 @@ async function withViewerUpvote(ctx: QueryCtx, product: Doc<"products">) {
   return { ...product, viewerHasUpvoted: existing !== null };
 }
 
+async function resolveLogoUrl(ctx: QueryCtx, product: Doc<"products">) {
+  if (!product.logoStorageId) return undefined;
+  return (await ctx.storage.getUrl(product.logoStorageId)) ?? undefined;
+}
+
 export const create = mutation({
   args: {
     name: v.string(),
@@ -36,6 +43,10 @@ export const create = mutation({
     ),
     categoryIds: v.array(v.id("categories")),
     topicNames: v.array(v.string()),
+    makerUserIds: v.array(v.id("users")),
+    logoStorageId: v.optional(v.id("_storage")),
+    galleryStorageIds: v.optional(v.array(v.id("_storage"))),
+    videoUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     if (args.categoryIds.length > MAX_CATEGORIES_PER_PRODUCT) {
@@ -43,6 +54,12 @@ export const create = mutation({
     }
     if (args.topicNames.length > MAX_TOPICS_PER_PRODUCT) {
       throw new Error(`Add at most ${MAX_TOPICS_PER_PRODUCT} topics`);
+    }
+    if (args.makerUserIds.length > MAX_MAKERS_PER_PRODUCT) {
+      throw new Error(`Add at most ${MAX_MAKERS_PER_PRODUCT} makers`);
+    }
+    if (args.galleryStorageIds && args.galleryStorageIds.length > MAX_GALLERY_IMAGES) {
+      throw new Error(`Add at most ${MAX_GALLERY_IMAGES} gallery images`);
     }
 
     const submitterId = await getOrCreateUser(ctx);
@@ -56,6 +73,9 @@ export const create = mutation({
       pricingType: args.pricingType,
       slug,
       logoSeed: slug,
+      logoStorageId: args.logoStorageId,
+      galleryStorageIds: args.galleryStorageIds,
+      videoUrl: args.videoUrl,
       submitterId,
       launchDay: todayInIST(),
       upvoteCount: 0,
@@ -75,6 +95,11 @@ export const create = mutation({
     }
     for (const topicId of uniqueTopicIds) {
       await ctx.db.insert("productTopics", { productId: id, topicId });
+    }
+
+    const uniqueMakerIds = new Set([submitterId, ...args.makerUserIds]);
+    for (const userId of uniqueMakerIds) {
+      await ctx.db.insert("makers", { productId: id, userId });
     }
 
     return { id, slug };
@@ -115,7 +140,12 @@ export const list = query({
 
     filtered = filtered.slice(0, args.featuredOnly ? FEATURED_COUNT : 50);
 
-    return await Promise.all(filtered.map((product) => withViewerUpvote(ctx, product)));
+    return await Promise.all(
+      filtered.map(async (product) => ({
+        ...(await withViewerUpvote(ctx, product)),
+        logoUrl: await resolveLogoUrl(ctx, product),
+      })),
+    );
   },
 });
 
@@ -144,10 +174,25 @@ export const getBySlug = query({
       topicLinks.map((link) => ctx.db.get("topics", link.topicId)),
     );
 
+    const makerLinks = await ctx.db
+      .query("makers")
+      .withIndex("by_product", (q) => q.eq("productId", product._id))
+      .take(10);
+    const makers = await Promise.all(
+      makerLinks.map((link) => ctx.db.get("users", link.userId)),
+    );
+
+    const galleryUrls = product.galleryStorageIds
+      ? await Promise.all(product.galleryStorageIds.map((id) => ctx.storage.getUrl(id)))
+      : [];
+
     return {
       ...(await withViewerUpvote(ctx, product)),
+      logoUrl: await resolveLogoUrl(ctx, product),
       categories: categories.filter((c): c is Doc<"categories"> => c !== null),
       topics: topics.filter((t): t is Doc<"topics"> => t !== null),
+      makers: makers.filter((m): m is Doc<"users"> => m !== null),
+      galleryUrls: galleryUrls.filter((url): url is string => url !== null),
     };
   },
 });

@@ -9,6 +9,7 @@
  */
 
 import type * as categories from "../categories.js";
+import type * as files from "../files.js";
 import type * as lib_utils from "../lib/utils.js";
 import type * as products from "../products.js";
 import type * as topics from "../topics.js";
@@ -23,6 +24,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   categories: typeof categories;
+  files: typeof files;
   "lib/utils": typeof lib_utils;
   products: typeof products;
   topics: typeof topics;

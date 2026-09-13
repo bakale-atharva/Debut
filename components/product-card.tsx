@@ -21,7 +21,7 @@ export function ProductCard({
   rank,
   isTop3,
 }: {
-  product: Doc<"products"> & { viewerHasUpvoted: boolean };
+  product: Doc<"products"> & { viewerHasUpvoted: boolean; logoUrl: string | undefined };
   rank: number;
   isTop3: boolean;
 }) {
@@ -50,7 +50,15 @@ export function ProductCard({
       >
         {String(rank).padStart(2, "0")}
       </span>
-      <ProductLogo seed={product.logoSeed} name={product.name} />
+      {product.logoUrl ? (
+        <img
+          src={product.logoUrl}
+          alt={`${product.name} logo`}
+          className="size-12 shrink-0 rounded-[10px] object-cover"
+        />
+      ) : (
+        <ProductLogo seed={product.logoSeed} name={product.name} />
+      )}
       <Link href={`/product/${product.slug}`} className="min-w-0 flex-1">
         <p className="truncate text-[15px] font-medium">{product.name}</p>
         <p className="truncate text-sm text-muted-foreground">{product.tagline}</p>

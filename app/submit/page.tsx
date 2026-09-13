@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
-import { X } from "lucide-react";
+import { X, UserPlus } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
@@ -22,25 +22,43 @@ import {
 import { cn } from "@/lib/utils";
 
 type PricingType = Doc<"products">["pricingType"];
+type MakerUser = Doc<"users">;
 
 const MAX_CATEGORIES = 3;
 const MAX_TOPICS = 5;
+const MAX_MAKERS = 12;
+const MAX_GALLERY_IMAGES = 10;
 
 export default function SubmitPage() {
   const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
   const createProduct = useMutation(api.products.create);
+  const generateUploadUrl = useMutation(api.files.generateUploadUrl);
   const categories = useQuery(api.categories.list);
 
   const [name, setName] = useState("");
   const [tagline, setTagline] = useState("");
   const [description, setDescription] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const [pricingType, setPricingType] = useState<PricingType>("free");
   const [categoryIds, setCategoryIds] = useState<Id<"categories">[]>([]);
   const [topics, setTopics] = useState<string[]>([]);
   const [topicDraft, setTopicDraft] = useState("");
+  const [makers, setMakers] = useState<MakerUser[]>([]);
+  const [makerDraft, setMakerDraft] = useState("");
+  const [logoStorageId, setLogoStorageId] = useState<Id<"_storage"> | null>(null);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [galleryStorageIds, setGalleryStorageIds] = useState<Id<"_storage">[]>([]);
+  const [galleryPreviewUrls, setGalleryPreviewUrls] = useState<string[]>([]);
+  const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const makerResults = useQuery(
+    api.users.search,
+    makerDraft.trim() ? { query: makerDraft.trim() } : "skip",
+  );
 
   if (!isLoaded) return null;
 
@@ -78,6 +96,51 @@ export default function SubmitPage() {
     }
   }
 
+  function addMaker(user: MakerUser) {
+    setMakerDraft("");
+    if (makers.length >= MAX_MAKERS || makers.some((m) => m._id === user._id)) return;
+    setMakers((prev) => [...prev, user]);
+  }
+
+  async function uploadFile(file: File): Promise<Id<"_storage">> {
+    const uploadUrl = await generateUploadUrl();
+    const response = await fetch(uploadUrl, {
+      method: "POST",
+      headers: { "Content-Type": file.type },
+      body: file,
+    });
+    const { storageId } = (await response.json()) as { storageId: Id<"_storage"> };
+    return storageId;
+  }
+
+  async function handleLogoChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setLogoPreviewUrl(URL.createObjectURL(file));
+    setIsUploadingLogo(true);
+    try {
+      setLogoStorageId(await uploadFile(file));
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  }
+
+  async function handleGalleryChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []).slice(
+      0,
+      MAX_GALLERY_IMAGES - galleryStorageIds.length,
+    );
+    if (files.length === 0) return;
+    setGalleryPreviewUrls((prev) => [...prev, ...files.map((f) => URL.createObjectURL(f))]);
+    setIsUploadingGallery(true);
+    try {
+      const uploaded = await Promise.all(files.map(uploadFile));
+      setGalleryStorageIds((prev) => [...prev, ...uploaded]);
+    } finally {
+      setIsUploadingGallery(false);
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setIsSubmitting(true);
@@ -90,6 +153,10 @@ export default function SubmitPage() {
         pricingType,
         categoryIds,
         topicNames: topics,
+        makerUserIds: makers.map((m) => m._id),
+        logoStorageId: logoStorageId ?? undefined,
+        galleryStorageIds: galleryStorageIds.length > 0 ? galleryStorageIds : undefined,
+        videoUrl: videoUrl.trim() || undefined,
       });
       router.push(`/product/${slug}`);
     } finally {
@@ -141,6 +208,60 @@ export default function SubmitPage() {
                   onChange={(e) => setWebsiteUrl(e.target.value)}
                   placeholder="https://"
                   required
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <h2 className="text-sm font-semibold text-muted-foreground">Media</h2>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="logo">Logo (optional — a monogram is generated otherwise)</Label>
+                <div className="flex items-center gap-3">
+                  {logoPreviewUrl && (
+                    <img
+                      src={logoPreviewUrl}
+                      alt="Logo preview"
+                      className="size-12 shrink-0 rounded-[10px] object-cover"
+                    />
+                  )}
+                  <Input id="logo" type="file" accept="image/*" onChange={handleLogoChange} />
+                </div>
+                {isUploadingLogo && <p className="text-xs text-muted-foreground">Uploading…</p>}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="gallery">Gallery (up to {MAX_GALLERY_IMAGES} images)</Label>
+                <Input
+                  id="gallery"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  disabled={galleryStorageIds.length >= MAX_GALLERY_IMAGES}
+                  onChange={handleGalleryChange}
+                />
+                {isUploadingGallery && <p className="text-xs text-muted-foreground">Uploading…</p>}
+                {galleryPreviewUrls.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {galleryPreviewUrls.map((url) => (
+                      <img
+                        key={url}
+                        src={url}
+                        alt="Gallery preview"
+                        className="size-14 rounded-lg border border-border object-cover"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="videoUrl">Video URL (optional)</Label>
+                <Input
+                  id="videoUrl"
+                  type="url"
+                  value={videoUrl}
+                  onChange={(e) => setVideoUrl(e.target.value)}
+                  placeholder="https://youtube.com/…"
                 />
               </div>
             </div>
@@ -223,7 +344,61 @@ export default function SubmitPage() {
               </div>
             </div>
 
-            <Button type="submit" disabled={isSubmitting} className="w-full rounded-full">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-sm font-semibold text-muted-foreground">Makers</h2>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="makerDraft">
+                  Tag teammates (up to {MAX_MAKERS} — you&rsquo;re added automatically)
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="makerDraft"
+                    value={makerDraft}
+                    onChange={(e) => setMakerDraft(e.target.value)}
+                    placeholder="Search by name"
+                    disabled={makers.length >= MAX_MAKERS}
+                  />
+                  {makerResults !== undefined && makerResults.length > 0 && (
+                    <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-border bg-popover shadow-md">
+                      {makerResults
+                        .filter((user) => !makers.some((m) => m._id === user._id))
+                        .map((user) => (
+                          <button
+                            key={user._id}
+                            type="button"
+                            onClick={() => addMaker(user)}
+                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent"
+                          >
+                            <UserPlus className="size-3.5 text-muted-foreground" />
+                            {user.name}
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </div>
+                {makers.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {makers.map((maker) => (
+                      <button
+                        key={maker._id}
+                        type="button"
+                        onClick={() => setMakers((prev) => prev.filter((m) => m._id !== maker._id))}
+                        className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium text-foreground hover:bg-accent"
+                      >
+                        {maker.name}
+                        <X className="size-3" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <Button
+              type="submit"
+              disabled={isSubmitting || isUploadingLogo || isUploadingGallery}
+              className="w-full rounded-full"
+            >
               {isSubmitting ? "Listing…" : "List it"}
             </Button>
           </form>

@@ -1,6 +1,7 @@
 import { query } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
+import { v } from "convex/values";
 
 /**
  * Resolves the caller's `users` row, creating it on first sight from their
@@ -35,6 +36,20 @@ export async function getViewerUserId(ctx: QueryCtx): Promise<Id<"users"> | null
     .unique();
   return user?._id ?? null;
 }
+
+/** Case-insensitive substring search over known users, for the maker picker. */
+export const search = query({
+  args: { query: v.string() },
+  handler: async (ctx, args) => {
+    const term = args.query.trim().toLowerCase();
+    if (!term) return [];
+
+    const candidates = await ctx.db.query("users").take(200);
+    return candidates
+      .filter((user) => user.name.toLowerCase().includes(term))
+      .slice(0, 20);
+  },
+});
 
 export const currentUser = query({
   args: {},

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
@@ -56,6 +56,9 @@ export default function SubmitPage() {
   const [galleryPreviewUrls, setGalleryPreviewUrls] = useState<string[]>([]);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   const makerResults = useQuery(
     api.users.search,
@@ -280,21 +283,49 @@ export default function SubmitPage() {
                       className="size-12 shrink-0 rounded-[10px] object-cover"
                     />
                   )}
-                  <Input id="logo" type="file" accept="image/*" onChange={handleLogoChange} />
+                  <input
+                    ref={logoInputRef}
+                    id="logo"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoChange}
+                    className="sr-only"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full"
+                    onClick={() => logoInputRef.current?.click()}
+                  >
+                    Choose logo
+                  </Button>
                 </div>
                 {isUploadingLogo && <p className="text-xs text-muted-foreground">Uploading…</p>}
               </div>
 
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="gallery">Gallery (up to {MAX_GALLERY_IMAGES} images)</Label>
-                <Input
+                <input
+                  ref={galleryInputRef}
                   id="gallery"
                   type="file"
                   accept="image/*"
                   multiple
                   disabled={galleryStorageIds.length >= MAX_GALLERY_IMAGES}
                   onChange={handleGalleryChange}
+                  className="sr-only"
                 />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-fit rounded-full"
+                  disabled={galleryStorageIds.length >= MAX_GALLERY_IMAGES}
+                  onClick={() => galleryInputRef.current?.click()}
+                >
+                  Add images
+                </Button>
                 {isUploadingGallery && <p className="text-xs text-muted-foreground">Uploading…</p>}
                 {galleryPreviewUrls.length > 0 && (
                   <div className="flex flex-wrap gap-2">
@@ -431,7 +462,7 @@ export default function SubmitPage() {
                     <div
                       id="maker-results"
                       role="listbox"
-                      className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-border bg-popover shadow-md"
+                      className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg bg-popover ring-1 ring-foreground/10"
                     >
                       {visibleMakerResults.map((user, index) => (
                         <button

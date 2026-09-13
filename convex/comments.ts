@@ -82,6 +82,35 @@ export const listForProduct = query({
   },
 });
 
+/** The most recent comments site-wide, for a homepage "recent discussion" widget. */
+export const recent = query({
+  args: {},
+  handler: async (ctx) => {
+    const comments = await ctx.db.query("comments").order("desc").take(5);
+
+    const rows = await Promise.all(
+      comments.map(async (comment) => {
+        const [author, product] = await Promise.all([
+          ctx.db.get("users", comment.authorId),
+          ctx.db.get("products", comment.productId),
+        ]);
+        if (!product) return null;
+
+        return {
+          _id: comment._id,
+          body: comment.body,
+          authorName: author?.name ?? "Deleted user",
+          authorAvatarUrl: author?.avatarUrl,
+          productName: product.name,
+          productSlug: product.slug,
+        };
+      }),
+    );
+
+    return rows.filter((row): row is NonNullable<typeof row> => row !== null);
+  },
+});
+
 export const toggleUpvote = mutation({
   args: { commentId: v.id("comments") },
   handler: async (ctx, args) => {

@@ -1,34 +1,16 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { getOrCreateUser, getViewerUserId } from "./users";
+import { getOrCreateUser } from "./users";
 import { generateUniqueSlug, todayInIST } from "./lib/utils";
 import { getOrCreateTopic } from "./topics";
+import { getProductBadges, resolveLogoUrl, withViewerUpvote } from "./lib/productView";
 import type { Doc, Id } from "./_generated/dataModel";
-import type { QueryCtx } from "./_generated/server";
 
 const MAX_CATEGORIES_PER_PRODUCT = 3;
 const MAX_TOPICS_PER_PRODUCT = 5;
 const MAX_MAKERS_PER_PRODUCT = 12;
 const MAX_GALLERY_IMAGES = 10;
 const FEATURED_COUNT = 5;
-
-async function withViewerUpvote(ctx: QueryCtx, product: Doc<"products">) {
-  const viewerUserId = await getViewerUserId(ctx);
-  if (!viewerUserId) return { ...product, viewerHasUpvoted: false };
-
-  const existing = await ctx.db
-    .query("upvotes")
-    .withIndex("by_product_and_user", (q) =>
-      q.eq("productId", product._id).eq("userId", viewerUserId),
-    )
-    .unique();
-  return { ...product, viewerHasUpvoted: existing !== null };
-}
-
-async function resolveLogoUrl(ctx: QueryCtx, product: Doc<"products">) {
-  if (!product.logoStorageId) return undefined;
-  return (await ctx.storage.getUrl(product.logoStorageId)) ?? undefined;
-}
 
 export const create = mutation({
   args: {
@@ -144,6 +126,7 @@ export const list = query({
       filtered.map(async (product) => ({
         ...(await withViewerUpvote(ctx, product)),
         logoUrl: await resolveLogoUrl(ctx, product),
+        badges: await getProductBadges(ctx, product._id),
       })),
     );
   },
@@ -189,6 +172,7 @@ export const getBySlug = query({
     return {
       ...(await withViewerUpvote(ctx, product)),
       logoUrl: await resolveLogoUrl(ctx, product),
+      badges: await getProductBadges(ctx, product._id),
       categories: categories.filter((c): c is Doc<"categories"> => c !== null),
       topics: topics.filter((t): t is Doc<"topics"> => t !== null),
       makers: makers.filter((m): m is Doc<"users"> => m !== null),

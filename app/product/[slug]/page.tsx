@@ -9,6 +9,7 @@ import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { ProductLogo } from "@/components/product-logo";
+import { ProductAwardBadge } from "@/components/product-award-badge";
 import { UserAvatar } from "@/components/user-avatar";
 import { CommentThread } from "@/components/comment-thread";
 
@@ -75,6 +76,8 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
         </div>
         {isSignedIn ? upvoteButton : <SignInButton mode="modal">{upvoteButton}</SignInButton>}
       </div>
+
+      <ProductAwardBadge badges={product.badges} />
 
       {product.makers.length > 0 && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">

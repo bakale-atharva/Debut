@@ -1,3 +1,5 @@
+import { cn } from "@/lib/utils";
+
 function hashString(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -20,15 +22,16 @@ export function ProductLogo({
   seed,
   name,
   size = 48,
+  featured = false,
   className,
 }: {
   seed: string;
   name: string;
   size?: number;
+  featured?: boolean;
   className?: string;
 }) {
   const colorIndex = (hashString(seed) % 5) + 1;
-  const textColor = colorIndex === 1 ? "var(--foreground)" : "var(--background)";
 
   return (
     <svg
@@ -37,7 +40,10 @@ export function ProductLogo({
       viewBox="0 0 48 48"
       role="img"
       aria-label={`${name} logo`}
-      className={className}
+      className={cn(
+        featured && "rounded-[12px] ring-2 ring-signal ring-offset-2 ring-offset-background",
+        className,
+      )}
     >
       <rect width="48" height="48" rx="10" fill={`var(--chart-${colorIndex})`} />
       <text
@@ -47,7 +53,7 @@ export function ProductLogo({
         textAnchor="middle"
         fontSize="18"
         fontWeight="600"
-        fill={textColor}
+        fill="var(--background)"
       >
         {initialsFor(name)}
       </text>

@@ -64,6 +64,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border/70 bg-background/80 p-4 backdrop-blur-sm">
               <Link
                 href="/"
+                aria-label="Debut, home"
                 className="flex shrink-0 items-center gap-2 font-semibold tracking-tight"
               >
                 <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
@@ -75,7 +76,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                   </defs>
                   <circle cx="9" cy="9" r="9" fill="url(#spotlight-dot)" />
                 </svg>
-                Debut
+                <span className="hidden sm:inline">Debut</span>
               </Link>
               <div className="flex flex-1 justify-center px-2">
                 <Suspense fallback={<div className="h-8 w-full max-w-sm" />}>
@@ -93,12 +94,13 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 <Button
                   variant="outline"
                   size="sm"
+                  aria-label="Submit a product"
                   className="flex rounded-full gap-1"
                   render={<Link href="/submit" />}
                   nativeButton={false}
                 >
                   <Plus className="size-3.5" aria-hidden="true" />
-                  Submit
+                  <span className="hidden sm:inline">Submit</span>
                 </Button>
                 <Show when="signed-out">
                   <SignInButton />

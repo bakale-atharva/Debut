@@ -40,6 +40,9 @@ export const metadata: Metadata = {
   title: "Debut",
   description:
     "An app for listing newly launched products, inspired by Sonny Sangha and vibecoded using Claude.",
+  other: {
+    "theme-color": "oklch(0.984 0.004 301.4)",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -47,10 +50,17 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      style={{ colorScheme: "light dark" }}
     >
       <body className="min-h-full flex flex-col">
         <ClerkProvider appearance={clerkAppearance}>
           <ConvexClientProvider>
+            <a
+              href="#main"
+              className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-2 focus-visible:left-2 focus-visible:z-50 focus-visible:rounded-lg focus-visible:bg-background focus-visible:px-3 focus-visible:py-2 focus-visible:text-sm focus-visible:font-medium focus-visible:shadow-md focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              Skip to content
+            </a>
             <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border/70 bg-background/80 p-4 backdrop-blur-sm">
               <Link
                 href="/"
@@ -77,7 +87,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                   href="/leaderboard"
                   className="hidden items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary sm:flex"
                 >
-                  <Trophy className="size-3.5" />
+                  <Trophy className="size-3.5" aria-hidden="true" />
                   Leaderboard
                 </Link>
                 <Button
@@ -87,7 +97,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                   render={<Link href="/submit" />}
                   nativeButton={false}
                 >
-                  <Plus className="size-3.5" />
+                  <Plus className="size-3.5" aria-hidden="true" />
                   Submit
                 </Button>
                 <Show when="signed-out">
@@ -99,7 +109,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 </Show>
               </div>
             </header>
-            {children}
+            <div id="main" className="flex flex-1 flex-col">
+              {children}
+            </div>
           </ConvexClientProvider>
         </ClerkProvider>
       </body>

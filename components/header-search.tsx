@@ -53,17 +53,22 @@ export function HeaderSearch() {
   }, []);
 
   return (
-    <div className="relative w-full max-w-sm">
-      <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+    <div role="search" className="relative w-full max-w-sm">
+      <Search
+        aria-hidden="true"
+        className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+      />
       <Input
         ref={inputRef}
+        type="search"
         value={term}
         onChange={(e) => setTerm(e.target.value)}
         placeholder="Search products…"
+        aria-label="Search products"
         className="pl-8 pr-11"
       />
       <kbd className="pointer-events-none absolute right-2 top-1/2 hidden -translate-y-1/2 items-center gap-0.5 rounded border border-border px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground sm:flex">
-        <Command className="size-2.5" />K
+        <Command aria-hidden="true" className="size-2.5" />K
       </kbd>
     </div>
   );

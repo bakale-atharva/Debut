@@ -37,10 +37,11 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
   const upvoteButton = (
     <Button
       variant={product.viewerHasUpvoted ? "boost" : "outline"}
+      aria-pressed={product.viewerHasUpvoted}
       className="rounded-full gap-1.5 font-mono tabular-nums"
       onClick={() => toggleUpvote({ productId: product._id })}
     >
-      <ArrowUp className="size-4" />
+      <ArrowUp aria-hidden="true" className="size-4" />
       {product.upvoteCount} upvote{product.upvoteCount === 1 ? "" : "s"}
     </Button>
   );
@@ -51,7 +52,7 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
         href="/"
         className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
       >
-        <ArrowLeft className="size-3.5" />
+        <ArrowLeft aria-hidden="true" className="size-3.5" />
         Back
       </Link>
 
@@ -60,6 +61,8 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
           <img
             src={product.logoUrl}
             alt={`${product.name} logo`}
+            width={64}
+            height={64}
             className="size-16 shrink-0 rounded-xl object-cover data-featured:ring-2 data-featured:ring-signal data-featured:ring-offset-2 data-featured:ring-offset-background"
             data-featured={product.isFeatured || undefined}
           />
@@ -72,7 +75,7 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
           />
         )}
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{product.name}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-balance">{product.name}</h1>
           <p className="text-muted-foreground">{product.tagline}</p>
         </div>
         {isSignedIn ? upvoteButton : <SignInButton mode="modal">{upvoteButton}</SignInButton>}
@@ -105,7 +108,7 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
           className="flex items-center gap-1 font-medium underline underline-offset-4"
         >
           Visit website
-          <ExternalLink className="size-3.5" />
+          <ExternalLink aria-hidden="true" className="size-3.5" />
         </a>
         {product.videoUrl && (
           <a
@@ -114,7 +117,7 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
             rel="noopener noreferrer"
             className="flex items-center gap-1 font-medium underline underline-offset-4"
           >
-            <PlayCircle className="size-3.5" />
+            <PlayCircle aria-hidden="true" className="size-3.5" />
             Watch video
           </a>
         )}
@@ -126,11 +129,13 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
 
       {product.galleryUrls.length > 0 && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          {product.galleryUrls.map((url) => (
+          {product.galleryUrls.map((url, i) => (
             <img
               key={url}
               src={url}
-              alt={`${product.name} screenshot`}
+              alt={`${product.name} screenshot ${i + 1} of ${product.galleryUrls.length}`}
+              width={640}
+              height={360}
               className="aspect-video w-full rounded-lg border border-border object-cover"
             />
           ))}

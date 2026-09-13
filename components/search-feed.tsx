@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery } from "convex/react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
@@ -20,12 +19,34 @@ const PRICING_OPTIONS: { value: PricingType | undefined; label: string }[] = [
 ];
 
 export function SearchFeed() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   // The search term itself lives in the header search bar and is read from the
   // URL here — already debounced there before it lands in `q`.
-  const term = useSearchParams().get("q") ?? "";
-  const [categorySlug, setCategorySlug] = useState<string | undefined>(undefined);
-  const [pricingType, setPricingType] = useState<PricingType | undefined>(undefined);
-  const [day, setDay] = useState<string | undefined>(undefined);
+  const term = searchParams.get("q") ?? "";
+  const categorySlug = searchParams.get("category") ?? undefined;
+  const pricingType = (searchParams.get("pricing") as PricingType | null) ?? undefined;
+  const day = searchParams.get("day") ?? undefined;
+
+  function updateParams(next: { category?: string; pricing?: string; day?: string }) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next.category !== undefined) {
+      if (!next.category) params.delete("category");
+      else params.set("category", next.category);
+    }
+    if (next.pricing !== undefined) {
+      if (!next.pricing) params.delete("pricing");
+      else params.set("pricing", next.pricing);
+    }
+    if (next.day !== undefined) {
+      if (!next.day) params.delete("day");
+      else params.set("day", next.day);
+    }
+    const query = params.toString();
+    router.replace(`${pathname}${query ? `?${query}` : ""}`, { scroll: false });
+  }
 
   const categories = useQuery(api.categories.list);
   const filters = { categorySlug, pricingType, day };
@@ -47,7 +68,8 @@ export function SearchFeed() {
             {PRICING_OPTIONS.map((option) => (
               <button
                 key={option.label}
-                onClick={() => setPricingType(option.value)}
+                aria-pressed={pricingType === option.value}
+                onClick={() => updateParams({ pricing: option.value ?? "" })}
                 className={cn(
                   "rounded-full px-2.5 py-1 text-xs font-medium",
                   pricingType === option.value
@@ -62,10 +84,13 @@ export function SearchFeed() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-sm font-semibold text-muted-foreground">Launch date</h2>
+          <h2 id="launch-date-heading" className="text-sm font-semibold text-muted-foreground">
+            Launch date
+          </h2>
           <div className="flex flex-col items-start gap-1.5">
             <button
-              onClick={() => setDay(undefined)}
+              aria-pressed={day === undefined}
+              onClick={() => updateParams({ day: "" })}
               className={cn(
                 "rounded-full px-2.5 py-1 text-xs font-medium",
                 day === undefined
@@ -78,17 +103,18 @@ export function SearchFeed() {
             <div className="flex w-full items-center gap-1">
               <Input
                 type="date"
+                aria-labelledby="launch-date-heading"
                 value={day ?? ""}
-                onChange={(e) => setDay(e.target.value || undefined)}
+                onChange={(e) => updateParams({ day: e.target.value })}
                 className="font-mono text-xs tabular-nums"
               />
               {day && (
                 <button
-                  onClick={() => setDay(undefined)}
+                  onClick={() => updateParams({ day: "" })}
                   aria-label="Clear date"
                   className="shrink-0 text-muted-foreground hover:text-foreground"
                 >
-                  <X className="size-3.5" />
+                  <X aria-hidden="true" className="size-3.5" />
                 </button>
               )}
             </div>
@@ -100,7 +126,8 @@ export function SearchFeed() {
             <h2 className="text-sm font-semibold text-muted-foreground">Category</h2>
             <div className="flex flex-col items-start gap-1">
               <button
-                onClick={() => setCategorySlug(undefined)}
+                aria-pressed={categorySlug === undefined}
+                onClick={() => updateParams({ category: "" })}
                 className={cn(
                   "rounded-full px-2.5 py-1 text-xs font-medium",
                   categorySlug === undefined
@@ -113,7 +140,8 @@ export function SearchFeed() {
               {categories.map((category) => (
                 <button
                   key={category._id}
-                  onClick={() => setCategorySlug(category.slug)}
+                  aria-pressed={categorySlug === category.slug}
+                  onClick={() => updateParams({ category: category.slug })}
                   className={cn(
                     "rounded-full px-2.5 py-1 text-xs font-medium",
                     categorySlug === category.slug

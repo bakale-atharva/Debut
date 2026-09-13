@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
@@ -47,6 +47,8 @@ export default function SubmitPage() {
   const [topicDraft, setTopicDraft] = useState("");
   const [makers, setMakers] = useState<MakerUser[]>([]);
   const [makerDraft, setMakerDraft] = useState("");
+  const [activeMakerIndex, setActiveMakerIndex] = useState(0);
+  const [makerDraftForIndex, setMakerDraftForIndex] = useState(makerDraft);
   const [logoStorageId, setLogoStorageId] = useState<Id<"_storage"> | null>(null);
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
@@ -59,6 +61,37 @@ export default function SubmitPage() {
     api.users.search,
     makerDraft.trim() ? { query: makerDraft.trim() } : "skip",
   );
+  const visibleMakerResults = (makerResults ?? []).filter(
+    (user) => !makers.some((m) => m._id === user._id),
+  );
+
+  // Reset the highlighted suggestion whenever the query changes — adjusted during
+  // render rather than in an effect, per React's "adjusting state" pattern.
+  if (makerDraft !== makerDraftForIndex) {
+    setMakerDraftForIndex(makerDraft);
+    setActiveMakerIndex(0);
+  }
+
+  const hasUnsavedChanges =
+    name.trim() !== "" ||
+    tagline.trim() !== "" ||
+    description.trim() !== "" ||
+    websiteUrl.trim() !== "" ||
+    videoUrl.trim() !== "" ||
+    categoryIds.length > 0 ||
+    topics.length > 0 ||
+    makers.length > 0 ||
+    logoStorageId !== null ||
+    galleryStorageIds.length > 0;
+
+  useEffect(() => {
+    if (!hasUnsavedChanges || isSubmitting) return;
+    function handleBeforeUnload(event: BeforeUnloadEvent) {
+      event.preventDefault();
+    }
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [hasUnsavedChanges, isSubmitting]);
 
   if (!isLoaded) return null;
 
@@ -100,6 +133,23 @@ export default function SubmitPage() {
     setMakerDraft("");
     if (makers.length >= MAX_MAKERS || makers.some((m) => m._id === user._id)) return;
     setMakers((prev) => [...prev, user]);
+  }
+
+  function handleMakerKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (visibleMakerResults.length === 0) return;
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActiveMakerIndex((i) => Math.min(i + 1, visibleMakerResults.length - 1));
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActiveMakerIndex((i) => Math.max(i - 1, 0));
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      const user = visibleMakerResults[activeMakerIndex];
+      if (user) addMaker(user);
+    } else if (event.key === "Escape") {
+      setMakerDraft("");
+    }
   }
 
   async function uploadFile(file: File): Promise<Id<"_storage">> {
@@ -166,7 +216,9 @@ export default function SubmitPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-10">
-      <h1 className="text-3xl font-semibold tracking-tight">Add to today&rsquo;s chart</h1>
+      <h1 className="text-3xl font-semibold tracking-tight text-balance">
+        Add to today&rsquo;s chart
+      </h1>
       <Card>
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -204,9 +256,11 @@ export default function SubmitPage() {
                 <Input
                   id="websiteUrl"
                   type="url"
+                  autoComplete="url"
+                  inputMode="url"
                   value={websiteUrl}
                   onChange={(e) => setWebsiteUrl(e.target.value)}
-                  placeholder="https://"
+                  placeholder="https://…"
                   required
                 />
               </div>
@@ -221,6 +275,8 @@ export default function SubmitPage() {
                     <img
                       src={logoPreviewUrl}
                       alt="Logo preview"
+                      width={48}
+                      height={48}
                       className="size-12 shrink-0 rounded-[10px] object-cover"
                     />
                   )}
@@ -247,6 +303,8 @@ export default function SubmitPage() {
                         key={url}
                         src={url}
                         alt="Gallery preview"
+                        width={56}
+                        height={56}
                         className="size-14 rounded-lg border border-border object-cover"
                       />
                     ))}
@@ -259,6 +317,8 @@ export default function SubmitPage() {
                 <Input
                   id="videoUrl"
                   type="url"
+                  autoComplete="url"
+                  inputMode="url"
                   value={videoUrl}
                   onChange={(e) => setVideoUrl(e.target.value)}
                   placeholder="https://youtube.com/…"
@@ -336,7 +396,7 @@ export default function SubmitPage() {
                         className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium text-foreground hover:bg-accent"
                       >
                         {topic}
-                        <X className="size-3" />
+                        <X aria-hidden="true" className="size-3" />
                       </button>
                     ))}
                   </div>
@@ -355,24 +415,41 @@ export default function SubmitPage() {
                     id="makerDraft"
                     value={makerDraft}
                     onChange={(e) => setMakerDraft(e.target.value)}
+                    onKeyDown={handleMakerKeyDown}
                     placeholder="Search by name"
                     disabled={makers.length >= MAX_MAKERS}
+                    role="combobox"
+                    aria-expanded={visibleMakerResults.length > 0}
+                    aria-controls="maker-results"
+                    aria-activedescendant={
+                      visibleMakerResults.length > 0
+                        ? `maker-option-${activeMakerIndex}`
+                        : undefined
+                    }
                   />
-                  {makerResults !== undefined && makerResults.length > 0 && (
-                    <div className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-border bg-popover shadow-md">
-                      {makerResults
-                        .filter((user) => !makers.some((m) => m._id === user._id))
-                        .map((user) => (
-                          <button
-                            key={user._id}
-                            type="button"
-                            onClick={() => addMaker(user)}
-                            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent"
-                          >
-                            <UserPlus className="size-3.5 text-muted-foreground" />
-                            {user.name}
-                          </button>
-                        ))}
+                  {visibleMakerResults.length > 0 && (
+                    <div
+                      id="maker-results"
+                      role="listbox"
+                      className="absolute z-10 mt-1 w-full overflow-hidden rounded-lg border border-border bg-popover shadow-md"
+                    >
+                      {visibleMakerResults.map((user, index) => (
+                        <button
+                          key={user._id}
+                          id={`maker-option-${index}`}
+                          role="option"
+                          aria-selected={index === activeMakerIndex}
+                          type="button"
+                          onClick={() => addMaker(user)}
+                          className={cn(
+                            "flex w-full items-center gap-2 px-3 py-2 text-left text-sm hover:bg-accent",
+                            index === activeMakerIndex && "bg-accent",
+                          )}
+                        >
+                          <UserPlus aria-hidden="true" className="size-3.5 text-muted-foreground" />
+                          {user.name}
+                        </button>
+                      ))}
                     </div>
                   )}
                 </div>
@@ -386,7 +463,7 @@ export default function SubmitPage() {
                         className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium text-foreground hover:bg-accent"
                       >
                         {maker.name}
-                        <X className="size-3" />
+                        <X aria-hidden="true" className="size-3" />
                       </button>
                     ))}
                   </div>

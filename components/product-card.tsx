@@ -37,10 +37,11 @@ export function ProductCard({
     <Button
       variant={product.viewerHasUpvoted ? "boost" : "outline"}
       size="sm"
+      aria-pressed={product.viewerHasUpvoted}
       className="rounded-full gap-1.5 font-mono tabular-nums"
       onClick={() => toggleUpvote({ productId: product._id })}
     >
-      <ArrowUp className="size-3.5" />
+      <ArrowUp aria-hidden="true" className="size-3.5" />
       {product.upvoteCount}
     </Button>
   );
@@ -61,6 +62,8 @@ export function ProductCard({
         <img
           src={product.logoUrl}
           alt={`${product.name} logo`}
+          width={48}
+          height={48}
           className="size-12 shrink-0 rounded-[10px] object-cover"
         />
       ) : (

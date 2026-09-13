@@ -60,6 +60,7 @@ export function CommentThread({ productId }: { productId: Id<"products"> }) {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder="Join the discussion"
+            aria-label="Comment"
             rows={3}
           />
           <Button
@@ -143,6 +144,7 @@ function CommentItem({
             value={replyDraft}
             onChange={(e) => setReplyDraft(e.target.value)}
             placeholder={`Reply to ${comment.authorName}`}
+            aria-label={`Reply to ${comment.authorName}`}
             rows={2}
           />
           <Button
@@ -183,12 +185,13 @@ function CommentRow({
   const upvoteButton = (
     <button
       onClick={onUpvote}
+      aria-pressed={comment.viewerHasUpvoted}
       className={cn(
         "flex items-center gap-1 font-mono text-xs tabular-nums text-muted-foreground hover:text-signal-text",
         comment.viewerHasUpvoted && "text-signal-text",
       )}
     >
-      <ArrowUp className="size-3" />
+      <ArrowUp aria-hidden="true" className="size-3" />
       {comment.upvoteCount}
     </button>
   );
@@ -214,7 +217,7 @@ function CommentRow({
               onClick={onReply}
               className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
             >
-              <ReplyIcon className="size-3" />
+              <ReplyIcon aria-hidden="true" className="size-3" />
               Reply
             </button>
           )}

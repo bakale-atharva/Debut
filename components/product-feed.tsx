@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import { useQuery } from "convex/react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import { formatDisplayDate, shiftDate, todayInIST } from "@/lib/dates";
@@ -11,9 +11,31 @@ import { cn } from "@/lib/utils";
 
 export function ProductFeed() {
   const today = todayInIST();
-  const [day, setDay] = useState(today);
-  const [categorySlug, setCategorySlug] = useState<string | undefined>(undefined);
-  const [featuredOnly, setFeaturedOnly] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const day = searchParams.get("day") ?? today;
+  const categorySlug = searchParams.get("category") ?? undefined;
+  const featuredOnly = searchParams.get("featured") === "1";
+
+  function updateParams(next: { day?: string; category?: string; featured?: boolean }) {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next.day !== undefined) {
+      if (next.day === today) params.delete("day");
+      else params.set("day", next.day);
+    }
+    if (next.category !== undefined) {
+      if (!next.category) params.delete("category");
+      else params.set("category", next.category);
+    }
+    if (next.featured !== undefined) {
+      if (!next.featured) params.delete("featured");
+      else params.set("featured", "1");
+    }
+    const query = params.toString();
+    router.replace(`${pathname}${query ? `?${query}` : ""}`, { scroll: false });
+  }
 
   const categories = useQuery(api.categories.list);
   const products = useQuery(api.products.list, { day, categorySlug, featuredOnly });
@@ -22,8 +44,12 @@ export function ProductFeed() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon-sm" onClick={() => setDay((d) => shiftDate(d, -1))}>
-            <ChevronLeft className="size-4" />
+          <Button
+            variant="outline"
+            size="icon-sm"
+            onClick={() => updateParams({ day: shiftDate(day, -1) })}
+          >
+            <ChevronLeft aria-hidden="true" className="size-4" />
           </Button>
           <p className="min-w-32 text-center font-mono text-sm tabular-nums sm:min-w-40">
             {formatDisplayDate(day)}
@@ -32,28 +58,30 @@ export function ProductFeed() {
             variant="outline"
             size="icon-sm"
             disabled={day >= today}
-            onClick={() => setDay((d) => shiftDate(d, 1))}
+            onClick={() => updateParams({ day: shiftDate(day, 1) })}
           >
-            <ChevronRight className="size-4" />
+            <ChevronRight aria-hidden="true" className="size-4" />
           </Button>
         </div>
 
         <div className="flex items-center gap-1 rounded-lg bg-secondary p-1">
           <button
+            aria-pressed={!featuredOnly}
             className={cn(
               "rounded-md px-3 py-1 text-sm font-medium",
               !featuredOnly && "bg-primary text-primary-foreground",
             )}
-            onClick={() => setFeaturedOnly(false)}
+            onClick={() => updateParams({ featured: false })}
           >
             All
           </button>
           <button
+            aria-pressed={featuredOnly}
             className={cn(
               "rounded-md px-3 py-1 text-sm font-medium",
               featuredOnly && "bg-primary text-primary-foreground",
             )}
-            onClick={() => setFeaturedOnly(true)}
+            onClick={() => updateParams({ featured: true })}
           >
             Featured
           </button>
@@ -63,7 +91,8 @@ export function ProductFeed() {
       {categories !== undefined && categories.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
           <button
-            onClick={() => setCategorySlug(undefined)}
+            aria-pressed={categorySlug === undefined}
+            onClick={() => updateParams({ category: "" })}
             className={cn(
               "rounded-full px-2.5 py-1 text-xs font-medium",
               categorySlug === undefined
@@ -76,7 +105,8 @@ export function ProductFeed() {
           {categories.map((category) => (
             <button
               key={category._id}
-              onClick={() => setCategorySlug(category.slug)}
+              aria-pressed={categorySlug === category.slug}
+              onClick={() => updateParams({ category: category.slug })}
               className={cn(
                 "rounded-full px-2.5 py-1 text-xs font-medium",
                 categorySlug === category.slug

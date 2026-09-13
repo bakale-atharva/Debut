@@ -17,6 +17,8 @@ export function UserAvatar({
         src={avatarUrl}
         alt={name}
         title={name}
+        width={size}
+        height={size}
         style={{ width: size, height: size }}
         className={cn("shrink-0 rounded-full object-cover ring-2 ring-background", className)}
       />

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "convex/react";
-import { Search, X } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { ProductCard } from "@/components/product-card";
@@ -18,18 +19,10 @@ const PRICING_OPTIONS: { value: PricingType | undefined; label: string }[] = [
   { value: "paid", label: "Paid" },
 ];
 
-function useDebounced<T>(value: T, delayMs: number): T {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const timer = setTimeout(() => setDebounced(value), delayMs);
-    return () => clearTimeout(timer);
-  }, [value, delayMs]);
-  return debounced;
-}
-
 export function SearchFeed() {
-  const [term, setTerm] = useState("");
-  const debouncedTerm = useDebounced(term, 250);
+  // The search term itself lives in the header search bar and is read from the
+  // URL here — already debounced there before it lands in `q`.
+  const term = useSearchParams().get("q") ?? "";
   const [categorySlug, setCategorySlug] = useState<string | undefined>(undefined);
   const [pricingType, setPricingType] = useState<PricingType | undefined>(undefined);
   const [day, setDay] = useState<string | undefined>(undefined);
@@ -38,29 +31,16 @@ export function SearchFeed() {
   const filters = { categorySlug, pricingType, day };
   const searchResults = useQuery(
     api.search.search,
-    debouncedTerm.trim() ? { term: debouncedTerm.trim(), ...filters } : "skip",
+    term.trim() ? { term: term.trim(), ...filters } : "skip",
   );
-  const trendingResults = useQuery(
-    api.search.trending,
-    debouncedTerm.trim() ? "skip" : filters,
-  );
+  const trendingResults = useQuery(api.search.trending, term.trim() ? "skip" : filters);
 
-  const isSearching = debouncedTerm.trim().length > 0;
+  const isSearching = term.trim().length > 0;
   const products = isSearching ? searchResults : trendingResults;
 
   return (
     <div className="flex flex-col gap-6 md:flex-row md:items-start">
       <aside className="flex w-full flex-col gap-6 md:w-56 md:shrink-0">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={term}
-            onChange={(e) => setTerm(e.target.value)}
-            placeholder="Search products…"
-            className="pl-8"
-          />
-        </div>
-
         <div className="flex flex-col gap-1.5">
           <h2 className="text-sm font-semibold text-muted-foreground">Pricing</h2>
           <div className="flex flex-col items-start gap-1">
@@ -151,7 +131,7 @@ export function SearchFeed() {
 
       <div className="min-w-0 flex-1">
         <h2 className="pb-4 text-sm font-semibold text-muted-foreground">
-          {isSearching ? `Results for "${debouncedTerm.trim()}"` : "Trending now"}
+          {isSearching ? `Results for "${term.trim()}"` : "Trending now"}
         </h2>
 
         {products === undefined ? (

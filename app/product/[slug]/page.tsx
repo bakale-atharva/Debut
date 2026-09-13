@@ -9,6 +9,8 @@ import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { ProductLogo } from "@/components/product-logo";
+import { UserAvatar } from "@/components/user-avatar";
+import { CommentThread } from "@/components/comment-thread";
 
 const PRICING_LABEL: Record<Doc<"products">["pricingType"], string> = {
   free: "Free",
@@ -78,25 +80,9 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           Made by
           <div className="flex items-center -space-x-2">
-            {product.makers.map((maker) =>
-              maker.avatarUrl ? (
-                <img
-                  key={maker._id}
-                  src={maker.avatarUrl}
-                  alt={maker.name}
-                  title={maker.name}
-                  className="size-6 rounded-full ring-2 ring-background object-cover"
-                />
-              ) : (
-                <span
-                  key={maker._id}
-                  title={maker.name}
-                  className="flex size-6 items-center justify-center rounded-full bg-secondary text-[10px] font-medium text-secondary-foreground ring-2 ring-background"
-                >
-                  {maker.name[0]?.toUpperCase() ?? "?"}
-                </span>
-              ),
-            )}
+            {product.makers.map((maker) => (
+              <UserAvatar key={maker._id} name={maker.name} avatarUrl={maker.avatarUrl} size={24} />
+            ))}
           </div>
           <span className="text-foreground">
             {product.makers.map((maker) => maker.name).join(", ")}
@@ -167,6 +153,10 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
           ))}
         </div>
       )}
+
+      <div className="border-t border-border pt-6">
+        <CommentThread productId={product._id} />
+      </div>
     </main>
   );
 }

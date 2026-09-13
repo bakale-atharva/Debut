@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth, SignInButton } from "@clerk/nextjs";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
+import { X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
-import type { Doc } from "@/convex/_generated/dataModel";
+import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -20,16 +22,23 @@ import {
 
 type PricingType = Doc<"products">["pricingType"];
 
+const MAX_CATEGORIES = 3;
+const MAX_TOPICS = 5;
+
 export default function SubmitPage() {
   const { isSignedIn, isLoaded } = useAuth();
   const router = useRouter();
   const createProduct = useMutation(api.products.create);
+  const categories = useQuery(api.categories.list);
 
   const [name, setName] = useState("");
   const [tagline, setTagline] = useState("");
   const [description, setDescription] = useState("");
   const [websiteUrl, setWebsiteUrl] = useState("");
   const [pricingType, setPricingType] = useState<PricingType>("free");
+  const [categoryIds, setCategoryIds] = useState<Id<"categories">[]>([]);
+  const [topics, setTopics] = useState<string[]>([]);
+  const [topicDraft, setTopicDraft] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isLoaded) return null;
@@ -45,6 +54,29 @@ export default function SubmitPage() {
     );
   }
 
+  function toggleCategory(id: Id<"categories">, checked: boolean) {
+    setCategoryIds((prev) => {
+      if (checked) {
+        return prev.length >= MAX_CATEGORIES ? prev : [...prev, id];
+      }
+      return prev.filter((existing) => existing !== id);
+    });
+  }
+
+  function addTopic() {
+    const name = topicDraft.trim();
+    setTopicDraft("");
+    if (!name || topics.length >= MAX_TOPICS || topics.includes(name)) return;
+    setTopics((prev) => [...prev, name]);
+  }
+
+  function handleTopicKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
+    if (event.key === "Enter" || event.key === ",") {
+      event.preventDefault();
+      addTopic();
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setIsSubmitting(true);
@@ -55,6 +87,8 @@ export default function SubmitPage() {
         description,
         websiteUrl,
         pricingType,
+        categoryIds,
+        topicNames: topics,
       });
       router.push(`/product/${slug}`);
     } finally {
@@ -117,6 +151,58 @@ export default function SubmitPage() {
               <SelectItem value="paid">Paid</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label>Categories (up to {MAX_CATEGORIES})</Label>
+          <div className="grid grid-cols-2 gap-2">
+            {categories?.map((category) => {
+              const checked = categoryIds.includes(category._id);
+              const disabled = !checked && categoryIds.length >= MAX_CATEGORIES;
+              return (
+                <label
+                  key={category._id}
+                  className="flex items-center gap-2 text-sm data-disabled:opacity-50"
+                  data-disabled={disabled || undefined}
+                >
+                  <Checkbox
+                    checked={checked}
+                    disabled={disabled}
+                    onCheckedChange={(value) => toggleCategory(category._id, value === true)}
+                  />
+                  {category.name}
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="topicDraft">Topics (up to {MAX_TOPICS})</Label>
+          <Input
+            id="topicDraft"
+            value={topicDraft}
+            onChange={(e) => setTopicDraft(e.target.value)}
+            onKeyDown={handleTopicKeyDown}
+            onBlur={addTopic}
+            placeholder="Type a topic and press Enter"
+            disabled={topics.length >= MAX_TOPICS}
+          />
+          {topics.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {topics.map((topic) => (
+                <button
+                  key={topic}
+                  type="button"
+                  onClick={() => setTopics((prev) => prev.filter((t) => t !== topic))}
+                  className="flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
+                >
+                  {topic}
+                  <X className="size-3" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <Button type="submit" disabled={isSubmitting}>

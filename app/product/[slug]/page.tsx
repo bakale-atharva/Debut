@@ -27,11 +27,19 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
   const toggleUpvote = useMutation(api.upvotes.toggle);
 
   if (product === undefined) {
-    return <p className="mx-auto max-w-2xl px-4 py-10 text-muted-foreground">Loading…</p>;
+    return (
+      <p className="mx-auto max-w-2xl px-4 py-10 text-muted-foreground">
+        Loading…
+      </p>
+    );
   }
 
   if (product === null) {
-    return <p className="mx-auto max-w-2xl px-4 py-10 text-muted-foreground">Product not found.</p>;
+    return (
+      <p className="mx-auto max-w-2xl px-4 py-10 text-muted-foreground">
+        Product not found.
+      </p>
+    );
   }
 
   const upvoteButton = (
@@ -75,10 +83,16 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
           />
         )}
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-balance">{product.name}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-balance">
+            {product.name}
+          </h1>
           <p className="text-muted-foreground">{product.tagline}</p>
         </div>
-        {isSignedIn ? upvoteButton : <SignInButton mode="modal">{upvoteButton}</SignInButton>}
+        {isSignedIn ? (
+          upvoteButton
+        ) : (
+          <SignInButton mode="modal">{upvoteButton}</SignInButton>
+        )}
       </div>
 
       <ProductAwardBadge badges={product.badges} />
@@ -88,7 +102,12 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
           Made by
           <div className="flex items-center -space-x-2">
             {product.makers.map((maker) => (
-              <UserAvatar key={maker._id} name={maker.name} avatarUrl={maker.avatarUrl} size={24} />
+              <UserAvatar
+                key={maker._id}
+                name={maker.name}
+                avatarUrl={maker.avatarUrl}
+                size={24}
+              />
             ))}
           </div>
           <span className="text-foreground">

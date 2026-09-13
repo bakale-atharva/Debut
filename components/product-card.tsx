@@ -8,7 +8,10 @@ import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { ProductLogo } from "@/components/product-logo";
-import { ProductAwardBadge, type ProductBadges } from "@/components/product-award-badge";
+import {
+  ProductAwardBadge,
+  type ProductBadges,
+} from "@/components/product-award-badge";
 import { cn } from "@/lib/utils";
 
 const PRICING_LABEL: Record<Doc<"products">["pricingType"], string> = {
@@ -42,7 +45,10 @@ export function ProductCard({
       variant={product.viewerHasUpvoted ? "boost" : "outline"}
       size="sm"
       aria-pressed={product.viewerHasUpvoted}
-      className={cn("rounded-full gap-1.5 font-mono tabular-nums", compact && "px-2")}
+      className={cn(
+        "rounded-full gap-1.5 font-mono tabular-nums",
+        compact && "px-2",
+      )}
       onClick={() => toggleUpvote({ productId: product._id })}
     >
       <ArrowUp aria-hidden="true" className="size-3.5" />
@@ -51,7 +57,12 @@ export function ProductCard({
   );
 
   return (
-    <div className={cn("flex items-center gap-4 py-4", compact && "gap-2.5 py-2.5")}>
+    <div
+      className={cn(
+        "flex items-center gap-4 py-4",
+        compact && "gap-2.5 py-2.5",
+      )}
+    >
       {rank !== undefined && (
         <span
           className={cn(
@@ -72,15 +83,25 @@ export function ProductCard({
           className="shrink-0 rounded-[10px] object-cover"
         />
       ) : (
-        <ProductLogo seed={product.logoSeed} name={product.name} size={logoSize} />
+        <ProductLogo
+          seed={product.logoSeed}
+          name={product.name}
+          size={logoSize}
+        />
       )}
       <Link href={`/product/${product.slug}`} className="min-w-0 flex-1">
         <p className="truncate text-[15px] font-medium">{product.name}</p>
-        <p className="truncate text-sm text-muted-foreground">{product.tagline}</p>
+        <p className="truncate text-sm text-muted-foreground">
+          {product.tagline}
+        </p>
       </Link>
       {!compact && (
         <>
-          <ProductAwardBadge badges={product.badges} compact className="hidden sm:inline-flex" />
+          <ProductAwardBadge
+            badges={product.badges}
+            compact
+            className="hidden sm:inline-flex"
+          />
           <span className="shrink-0 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground">
             {PRICING_LABEL[product.pricingType]}
           </span>

@@ -12,7 +12,9 @@ export function SimilarProducts({ productId }: { productId: Id<"products"> }) {
 
   return (
     <div className="border-t border-border pt-6">
-      <h2 className="pb-2 text-sm font-semibold text-muted-foreground">Similar products</h2>
+      <h2 className="pb-2 text-sm font-semibold text-muted-foreground">
+        Similar products
+      </h2>
       {products === undefined ? (
         <p className="text-muted-foreground">Loading…</p>
       ) : (

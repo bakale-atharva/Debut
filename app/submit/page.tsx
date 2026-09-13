@@ -49,10 +49,14 @@ export default function SubmitPage() {
   const [makerDraft, setMakerDraft] = useState("");
   const [activeMakerIndex, setActiveMakerIndex] = useState(0);
   const [makerDraftForIndex, setMakerDraftForIndex] = useState(makerDraft);
-  const [logoStorageId, setLogoStorageId] = useState<Id<"_storage"> | null>(null);
+  const [logoStorageId, setLogoStorageId] = useState<Id<"_storage"> | null>(
+    null,
+  );
   const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
-  const [galleryStorageIds, setGalleryStorageIds] = useState<Id<"_storage">[]>([]);
+  const [galleryStorageIds, setGalleryStorageIds] = useState<Id<"_storage">[]>(
+    [],
+  );
   const [galleryPreviewUrls, setGalleryPreviewUrls] = useState<string[]>([]);
   const [isUploadingGallery, setIsUploadingGallery] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -134,7 +138,8 @@ export default function SubmitPage() {
 
   function addMaker(user: MakerUser) {
     setMakerDraft("");
-    if (makers.length >= MAX_MAKERS || makers.some((m) => m._id === user._id)) return;
+    if (makers.length >= MAX_MAKERS || makers.some((m) => m._id === user._id))
+      return;
     setMakers((prev) => [...prev, user]);
   }
 
@@ -142,7 +147,9 @@ export default function SubmitPage() {
     if (visibleMakerResults.length === 0) return;
     if (event.key === "ArrowDown") {
       event.preventDefault();
-      setActiveMakerIndex((i) => Math.min(i + 1, visibleMakerResults.length - 1));
+      setActiveMakerIndex((i) =>
+        Math.min(i + 1, visibleMakerResults.length - 1),
+      );
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActiveMakerIndex((i) => Math.max(i - 1, 0));
@@ -162,7 +169,9 @@ export default function SubmitPage() {
       headers: { "Content-Type": file.type },
       body: file,
     });
-    const { storageId } = (await response.json()) as { storageId: Id<"_storage"> };
+    const { storageId } = (await response.json()) as {
+      storageId: Id<"_storage">;
+    };
     return storageId;
   }
 
@@ -178,13 +187,18 @@ export default function SubmitPage() {
     }
   }
 
-  async function handleGalleryChange(event: React.ChangeEvent<HTMLInputElement>) {
+  async function handleGalleryChange(
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) {
     const files = Array.from(event.target.files ?? []).slice(
       0,
       MAX_GALLERY_IMAGES - galleryStorageIds.length,
     );
     if (files.length === 0) return;
-    setGalleryPreviewUrls((prev) => [...prev, ...files.map((f) => URL.createObjectURL(f))]);
+    setGalleryPreviewUrls((prev) => [
+      ...prev,
+      ...files.map((f) => URL.createObjectURL(f)),
+    ]);
     setIsUploadingGallery(true);
     try {
       const uploaded = await Promise.all(files.map(uploadFile));
@@ -208,7 +222,8 @@ export default function SubmitPage() {
         topicNames: topics,
         makerUserIds: makers.map((m) => m._id),
         logoStorageId: logoStorageId ?? undefined,
-        galleryStorageIds: galleryStorageIds.length > 0 ? galleryStorageIds : undefined,
+        galleryStorageIds:
+          galleryStorageIds.length > 0 ? galleryStorageIds : undefined,
         videoUrl: videoUrl.trim() || undefined,
       });
       router.push(`/product/${slug}`);
@@ -226,10 +241,17 @@ export default function SubmitPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
-              <h2 className="text-sm font-semibold text-muted-foreground">Basics</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground">
+                Basics
+              </h2>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="name">Name</Label>
-                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
               </div>
 
               <div className="flex flex-col gap-1.5">
@@ -270,9 +292,13 @@ export default function SubmitPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <h2 className="text-sm font-semibold text-muted-foreground">Media</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground">
+                Media
+              </h2>
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="logo">Logo (optional — a monogram is generated otherwise)</Label>
+                <Label htmlFor="logo">
+                  Logo (optional — a monogram is generated otherwise)
+                </Label>
                 <div className="flex items-center gap-3">
                   {logoPreviewUrl && (
                     <img
@@ -301,11 +327,15 @@ export default function SubmitPage() {
                     Choose logo
                   </Button>
                 </div>
-                {isUploadingLogo && <p className="text-xs text-muted-foreground">Uploading…</p>}
+                {isUploadingLogo && (
+                  <p className="text-xs text-muted-foreground">Uploading…</p>
+                )}
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <Label htmlFor="gallery">Gallery (up to {MAX_GALLERY_IMAGES} images)</Label>
+                <Label htmlFor="gallery">
+                  Gallery (up to {MAX_GALLERY_IMAGES} images)
+                </Label>
                 <input
                   ref={galleryInputRef}
                   id="gallery"
@@ -326,7 +356,9 @@ export default function SubmitPage() {
                 >
                   Add images
                 </Button>
-                {isUploadingGallery && <p className="text-xs text-muted-foreground">Uploading…</p>}
+                {isUploadingGallery && (
+                  <p className="text-xs text-muted-foreground">Uploading…</p>
+                )}
                 {galleryPreviewUrls.length > 0 && (
                   <div className="flex flex-wrap gap-2">
                     {galleryPreviewUrls.map((url) => (
@@ -358,12 +390,16 @@ export default function SubmitPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <h2 className="text-sm font-semibold text-muted-foreground">Pricing & categories</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground">
+                Pricing & categories
+              </h2>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="pricingType">Pricing</Label>
                 <Select
                   value={pricingType}
-                  onValueChange={(value) => setPricingType(value as PricingType)}
+                  onValueChange={(value) =>
+                    setPricingType(value as PricingType)
+                  }
                 >
                   <SelectTrigger id="pricingType" className="w-full">
                     <SelectValue />
@@ -381,7 +417,8 @@ export default function SubmitPage() {
                 <div className="flex flex-wrap gap-1.5">
                   {categories?.map((category) => {
                     const checked = categoryIds.includes(category._id);
-                    const disabled = !checked && categoryIds.length >= MAX_CATEGORIES;
+                    const disabled =
+                      !checked && categoryIds.length >= MAX_CATEGORIES;
                     return (
                       <button
                         key={category._id}
@@ -405,7 +442,9 @@ export default function SubmitPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <h2 className="text-sm font-semibold text-muted-foreground">Topics</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground">
+                Topics
+              </h2>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="topicDraft">Topics (up to {MAX_TOPICS})</Label>
                 <Input
@@ -423,7 +462,9 @@ export default function SubmitPage() {
                       <button
                         key={topic}
                         type="button"
-                        onClick={() => setTopics((prev) => prev.filter((t) => t !== topic))}
+                        onClick={() =>
+                          setTopics((prev) => prev.filter((t) => t !== topic))
+                        }
                         className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium text-foreground hover:bg-accent"
                       >
                         {topic}
@@ -436,10 +477,13 @@ export default function SubmitPage() {
             </div>
 
             <div className="flex flex-col gap-4">
-              <h2 className="text-sm font-semibold text-muted-foreground">Makers</h2>
+              <h2 className="text-sm font-semibold text-muted-foreground">
+                Makers
+              </h2>
               <div className="flex flex-col gap-1.5">
                 <Label htmlFor="makerDraft">
-                  Tag teammates (up to {MAX_MAKERS} — you&rsquo;re added automatically)
+                  Tag teammates (up to {MAX_MAKERS} — you&rsquo;re added
+                  automatically)
                 </Label>
                 <div className="relative">
                   <Input
@@ -477,7 +521,10 @@ export default function SubmitPage() {
                             index === activeMakerIndex && "bg-accent",
                           )}
                         >
-                          <UserPlus aria-hidden="true" className="size-3.5 text-muted-foreground" />
+                          <UserPlus
+                            aria-hidden="true"
+                            className="size-3.5 text-muted-foreground"
+                          />
                           {user.name}
                         </button>
                       ))}
@@ -490,7 +537,11 @@ export default function SubmitPage() {
                       <button
                         key={maker._id}
                         type="button"
-                        onClick={() => setMakers((prev) => prev.filter((m) => m._id !== maker._id))}
+                        onClick={() =>
+                          setMakers((prev) =>
+                            prev.filter((m) => m._id !== maker._id),
+                          )
+                        }
                         className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium text-foreground hover:bg-accent"
                       >
                         {maker.name}

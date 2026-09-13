@@ -43,16 +43,25 @@ export function LeaderboardFeed() {
   const searchParams = useSearchParams();
 
   const period = (searchParams.get("period") as Period | null) ?? "day";
-  const periodKey = searchParams.get("key") ?? defaultKeyFor(period, referenceDay);
+  const periodKey =
+    searchParams.get("key") ?? defaultKeyFor(period, referenceDay);
   const categorySlug = searchParams.get("category") ?? undefined;
 
   const categories = useQuery(api.categories.list);
-  const products = useQuery(api.rankings.getLeaderboard, { period, periodKey, categorySlug });
+  const products = useQuery(api.rankings.getLeaderboard, {
+    period,
+    periodKey,
+    categorySlug,
+  });
 
   const defaultKey = defaultKeyFor(period, referenceDay);
   const atLatest = periodKey >= defaultKey;
 
-  function updateParams(next: { period?: Period; key?: string; category?: string }) {
+  function updateParams(next: {
+    period?: Period;
+    key?: string;
+    category?: string;
+  }) {
     const params = new URLSearchParams(searchParams.toString());
     const nextPeriod = next.period ?? period;
 
@@ -60,8 +69,10 @@ export function LeaderboardFeed() {
     else params.set("period", nextPeriod);
 
     const nextKey =
-      next.key ?? (next.period ? defaultKeyFor(next.period, referenceDay) : periodKey);
-    if (nextKey === defaultKeyFor(nextPeriod, referenceDay)) params.delete("key");
+      next.key ??
+      (next.period ? defaultKeyFor(next.period, referenceDay) : periodKey);
+    if (nextKey === defaultKeyFor(nextPeriod, referenceDay))
+      params.delete("key");
     else params.set("key", nextKey);
 
     if (next.category !== undefined) {
@@ -102,7 +113,12 @@ export function LeaderboardFeed() {
           <p className="min-w-32 text-center font-mono text-sm tabular-nums sm:min-w-48">
             {periodLabel}
           </p>
-          <Button variant="outline" size="icon-sm" disabled={atLatest} onClick={goNext}>
+          <Button
+            variant="outline"
+            size="icon-sm"
+            disabled={atLatest}
+            onClick={goNext}
+          >
             <ChevronRight aria-hidden="true" className="size-4" />
           </Button>
         </div>
@@ -159,11 +175,18 @@ export function LeaderboardFeed() {
       {products === undefined ? (
         <p className="text-muted-foreground">Loading rankings…</p>
       ) : products.length === 0 ? (
-        <p className="text-muted-foreground">No rankings for this period yet.</p>
+        <p className="text-muted-foreground">
+          No rankings for this period yet.
+        </p>
       ) : (
         <div className="flex flex-col divide-y divide-border">
           {products.map((product, i) => (
-            <ProductCard key={product._id} product={product} rank={i + 1} isTop3={i < 3} />
+            <ProductCard
+              key={product._id}
+              product={product}
+              rank={i + 1}
+              isTop3={i < 3}
+            />
           ))}
         </div>
       )}

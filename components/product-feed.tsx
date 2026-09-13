@@ -19,7 +19,11 @@ export function ProductFeed() {
   const categorySlug = searchParams.get("category") ?? undefined;
   const featuredOnly = searchParams.get("featured") === "1";
 
-  function updateParams(next: { day?: string; category?: string; featured?: boolean }) {
+  function updateParams(next: {
+    day?: string;
+    category?: string;
+    featured?: boolean;
+  }) {
     const params = new URLSearchParams(searchParams.toString());
     if (next.day !== undefined) {
       if (next.day === today) params.delete("day");
@@ -38,7 +42,11 @@ export function ProductFeed() {
   }
 
   const categories = useQuery(api.categories.list);
-  const products = useQuery(api.products.list, { day, categorySlug, featuredOnly });
+  const products = useQuery(api.products.list, {
+    day,
+    categorySlug,
+    featuredOnly,
+  });
 
   return (
     <div className="flex flex-col gap-4">
@@ -123,11 +131,18 @@ export function ProductFeed() {
       {products === undefined ? (
         <p className="text-muted-foreground">Loading products…</p>
       ) : products.length === 0 ? (
-        <p className="text-muted-foreground">No products match these filters.</p>
+        <p className="text-muted-foreground">
+          No products match these filters.
+        </p>
       ) : (
         <div className="flex flex-col divide-y divide-border">
           {products.map((product, i) => (
-            <ProductCard key={product._id} product={product} rank={i + 1} isTop3={i < 3} />
+            <ProductCard
+              key={product._id}
+              product={product}
+              rank={i + 1}
+              isTop3={i < 3}
+            />
           ))}
         </div>
       )}

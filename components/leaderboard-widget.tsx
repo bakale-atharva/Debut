@@ -11,16 +11,23 @@ const MAX_SHOWN = 3;
 export function LeaderboardWidget() {
   // Rankings only exist for closed periods — mirrors LeaderboardFeed's default.
   const periodKey = weekKeyFor(shiftDate(todayInIST(), -1));
-  const products = useQuery(api.rankings.getLeaderboard, { period: "week", periodKey });
+  const products = useQuery(api.rankings.getLeaderboard, {
+    period: "week",
+    periodKey,
+  });
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold text-muted-foreground">This week&rsquo;s leaderboard</h2>
+      <h2 className="text-sm font-semibold text-muted-foreground">
+        This week&rsquo;s leaderboard
+      </h2>
 
       {products === undefined ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : products.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No rankings for this week yet.</p>
+        <p className="text-sm text-muted-foreground">
+          No rankings for this week yet.
+        </p>
       ) : (
         <div className="flex flex-col divide-y divide-border">
           {products.slice(0, MAX_SHOWN).map((product, i) => (

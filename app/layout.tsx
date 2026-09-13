@@ -67,9 +67,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                 aria-label="Debut, home"
                 className="flex shrink-0 items-center gap-2 font-semibold tracking-tight"
               >
-                <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 18 18"
+                  aria-hidden="true"
+                >
                   <defs>
-                    <linearGradient id="spotlight-dot" x1="0" y1="0" x2="1" y2="1">
+                    <linearGradient
+                      id="spotlight-dot"
+                      x1="0"
+                      y1="0"
+                      x2="1"
+                      y2="1"
+                    >
                       <stop offset="0%" stopColor="var(--signal)" />
                       <stop offset="100%" stopColor="var(--primary)" />
                     </linearGradient>

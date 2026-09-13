@@ -13,7 +13,9 @@ export async function getOrCreateUser(ctx: MutationCtx): Promise<Id<"users">> {
 
   const existing = await ctx.db
     .query("users")
-    .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+    .withIndex("by_token", (q) =>
+      q.eq("tokenIdentifier", identity.tokenIdentifier),
+    )
     .unique();
   if (existing) return existing._id;
 
@@ -26,13 +28,17 @@ export async function getOrCreateUser(ctx: MutationCtx): Promise<Id<"users">> {
 }
 
 /** The caller's `users` row id, or `null` if signed out or never synced. */
-export async function getViewerUserId(ctx: QueryCtx): Promise<Id<"users"> | null> {
+export async function getViewerUserId(
+  ctx: QueryCtx,
+): Promise<Id<"users"> | null> {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) return null;
 
   const user = await ctx.db
     .query("users")
-    .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+    .withIndex("by_token", (q) =>
+      q.eq("tokenIdentifier", identity.tokenIdentifier),
+    )
     .unique();
   return user?._id ?? null;
 }

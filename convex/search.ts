@@ -1,6 +1,10 @@
 import { query } from "./_generated/server";
 import { v } from "convex/values";
-import { getProductBadges, resolveLogoUrl, withViewerUpvote } from "./lib/productView";
+import {
+  getProductBadges,
+  resolveLogoUrl,
+  withViewerUpvote,
+} from "./lib/productView";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { QueryCtx } from "./_generated/server";
 
@@ -58,7 +62,8 @@ export const search = query({
       .withSearchIndex("search_products", (q) => {
         let builder = q.search("name", term);
         if (args.day) builder = builder.eq("launchDay", args.day);
-        if (args.pricingType) builder = builder.eq("pricingType", args.pricingType);
+        if (args.pricingType)
+          builder = builder.eq("pricingType", args.pricingType);
         return builder;
       })
       .take(MAX_RESULTS);
@@ -67,7 +72,9 @@ export const search = query({
       ? hits.filter((product) => allowedProductIds.has(product._id))
       : hits;
 
-    return await Promise.all(filtered.map((product) => hydrateProduct(ctx, product)));
+    return await Promise.all(
+      filtered.map((product) => hydrateProduct(ctx, product)),
+    );
   },
 });
 
@@ -89,21 +96,28 @@ export const trending = query({
 
     const allowedProductIds = await categoryProductIds(ctx, args.categorySlug);
     const ranked = [...counts.entries()]
-      .filter(([productId]) => !allowedProductIds || allowedProductIds.has(productId))
+      .filter(
+        ([productId]) => !allowedProductIds || allowedProductIds.has(productId),
+      )
       .sort((a, b) => b[1] - a[1])
       .slice(0, MAX_RESULTS);
 
     const candidates = await Promise.all(
       ranked.map(([productId]) => ctx.db.get("products", productId)),
     );
-    const products = candidates.filter((product): product is Doc<"products"> => {
-      if (!product) return false;
-      if (args.day && product.launchDay !== args.day) return false;
-      if (args.pricingType && product.pricingType !== args.pricingType) return false;
-      return true;
-    });
+    const products = candidates.filter(
+      (product): product is Doc<"products"> => {
+        if (!product) return false;
+        if (args.day && product.launchDay !== args.day) return false;
+        if (args.pricingType && product.pricingType !== args.pricingType)
+          return false;
+        return true;
+      },
+    );
 
-    return await Promise.all(products.map((product) => hydrateProduct(ctx, product)));
+    return await Promise.all(
+      products.map((product) => hydrateProduct(ctx, product)),
+    );
   },
 });
 
@@ -124,7 +138,10 @@ export const similar = query({
     const tally = async (peers: { productId: Id<"products"> }[]) => {
       for (const peer of peers) {
         if (peer.productId === args.productId) continue;
-        sharedCount.set(peer.productId, (sharedCount.get(peer.productId) ?? 0) + 1);
+        sharedCount.set(
+          peer.productId,
+          (sharedCount.get(peer.productId) ?? 0) + 1,
+        );
       }
     };
 
@@ -150,8 +167,12 @@ export const similar = query({
     const candidates = await Promise.all(
       ranked.map(([productId]) => ctx.db.get("products", productId)),
     );
-    const products = candidates.filter((product): product is Doc<"products"> => product !== null);
+    const products = candidates.filter(
+      (product): product is Doc<"products"> => product !== null,
+    );
 
-    return await Promise.all(products.map((product) => hydrateProduct(ctx, product)));
+    return await Promise.all(
+      products.map((product) => hydrateProduct(ctx, product)),
+    );
   },
 });

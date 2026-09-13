@@ -1,4 +1,8 @@
-import { internalAction, internalMutation, internalQuery } from "./_generated/server";
+import {
+  internalAction,
+  internalMutation,
+  internalQuery,
+} from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import type { Id } from "./_generated/dataModel";
 import { v } from "convex/values";
@@ -127,7 +131,8 @@ function unsplashIcon(photoId: string): string {
 const PRODUCTS: SeedProduct[] = [
   {
     name: "Flowbase",
-    tagline: "Automate your busywork with AI agents that actually finish tasks.",
+    tagline:
+      "Automate your busywork with AI agents that actually finish tasks.",
     description:
       "Flowbase chains AI agents together to handle repetitive multi-step work — triaging inboxes, updating spreadsheets, filing tickets — so teams can skip the busywork entirely.",
     websiteUrl: "https://flowbase.app",
@@ -407,7 +412,8 @@ const PRODUCTS: SeedProduct[] = [
   },
   {
     name: "CircuitBox",
-    tagline: "A prototyping kit that gets hardware hackers to 'it works' faster.",
+    tagline:
+      "A prototyping kit that gets hardware hackers to 'it works' faster.",
     description:
       "CircuitBox bundles a reusable dev board, sensors, and a visual firmware builder so hobbyists can prototype hardware ideas in a weekend.",
     websiteUrl: "https://circuitbox.dev",
@@ -471,7 +477,7 @@ const PRODUCTS: SeedProduct[] = [
     name: "ScopeCraft",
     tagline: "Stop scope creep before it eats your freelance margin.",
     description:
-      "ScopeCraft turns client requests into logged change orders, so \"just one more thing\" gets billed instead of absorbed.",
+      'ScopeCraft turns client requests into logged change orders, so "just one more thing" gets billed instead of absorbed.',
     websiteUrl: "https://scopecraft.app",
     pricingType: "free",
     categorySlugs: ["productivity", "saas"],
@@ -508,7 +514,8 @@ const PRODUCTS: SeedProduct[] = [
   },
   {
     name: "Ledgerly",
-    tagline: "Multi-currency invoicing built for freelancers with global clients.",
+    tagline:
+      "Multi-currency invoicing built for freelancers with global clients.",
     description:
       "Ledgerly generates compliant invoices in your client's currency and tracks exchange-rate gains and losses automatically.",
     websiteUrl: "https://ledgerly.io",
@@ -625,7 +632,8 @@ const PRODUCTS: SeedProduct[] = [
   },
   {
     name: "Runbook",
-    tagline: "Incident response playbooks your on-call engineer can follow at 3am.",
+    tagline:
+      "Incident response playbooks your on-call engineer can follow at 3am.",
     description:
       "Runbook turns tribal knowledge into step-by-step playbooks that trigger automatically when an alert fires, with on-call scheduling built in.",
     websiteUrl: "https://runbook.dev",
@@ -716,7 +724,8 @@ const PRODUCTS: SeedProduct[] = [
   },
   {
     name: "Craftmail",
-    tagline: "A newsletter builder made for indie writers, not marketing teams.",
+    tagline:
+      "A newsletter builder made for indie writers, not marketing teams.",
     description:
       "Craftmail strips newsletter publishing down to writing and hitting send, with just enough analytics to see what resonated.",
     websiteUrl: "https://craftmail.app",
@@ -829,13 +838,19 @@ async function seedCommentsForProduct(
   const comment1Id = await ctx.db.insert("comments", {
     productId,
     authorId: author1,
-    body: COMMENT_TEMPLATES[i % COMMENT_TEMPLATES.length].replace("{name}", product.name),
+    body: COMMENT_TEMPLATES[i % COMMENT_TEMPLATES.length].replace(
+      "{name}",
+      product.name,
+    ),
     upvoteCount: 0,
   });
   const comment2Id = await ctx.db.insert("comments", {
     productId,
     authorId: author2,
-    body: COMMENT_TEMPLATES[(i + 3) % COMMENT_TEMPLATES.length].replace("{name}", product.name),
+    body: COMMENT_TEMPLATES[(i + 3) % COMMENT_TEMPLATES.length].replace(
+      "{name}",
+      product.name,
+    ),
     upvoteCount: 0,
   });
 
@@ -856,7 +871,10 @@ async function seedCommentsForProduct(
     [comment1Id, authorKey1],
     [comment2Id, authorKey2],
   ] as const) {
-    const upvoterKeys = ALL_MAKER_KEYS.filter((key) => key !== authorKey).slice(0, 1 + (i % 3));
+    const upvoterKeys = ALL_MAKER_KEYS.filter((key) => key !== authorKey).slice(
+      0,
+      1 + (i % 3),
+    );
     let count = 0;
     for (const upvoterKey of upvoterKeys) {
       const userId = makerIdByKey.get(upvoterKey);
@@ -883,7 +901,9 @@ export const seed = internalMutation({
         .query("categories")
         .withIndex("by_slug", (q) => q.eq("slug", slug))
         .unique();
-      const id = existing ? existing._id : await ctx.db.insert("categories", { name, slug });
+      const id = existing
+        ? existing._id
+        : await ctx.db.insert("categories", { name, slug });
       categoryIdBySlug.set(slug, id);
     }
 
@@ -918,7 +938,8 @@ export const seed = internalMutation({
         productId = existing._id;
       } else {
         const submitterId = makerIdByKey.get(product.makerKeys[0]);
-        if (!submitterId) throw new Error(`Unknown maker key ${product.makerKeys[0]}`);
+        if (!submitterId)
+          throw new Error(`Unknown maker key ${product.makerKeys[0]}`);
 
         productId = await ctx.db.insert("products", {
           name: product.name,
@@ -936,7 +957,8 @@ export const seed = internalMutation({
 
         for (const categorySlug of product.categorySlugs) {
           const categoryId = categoryIdBySlug.get(categorySlug);
-          if (!categoryId) throw new Error(`Unknown category slug ${categorySlug}`);
+          if (!categoryId)
+            throw new Error(`Unknown category slug ${categorySlug}`);
           await ctx.db.insert("productCategories", { productId, categoryId });
         }
 
@@ -1011,7 +1033,9 @@ export const seedLogos = internalAction({
   handler: async (ctx) => {
     for (const product of PRODUCTS) {
       const slug = slugify(product.name);
-      const existing = await ctx.runQuery(internal.seed.getProductBySlug, { slug });
+      const existing = await ctx.runQuery(internal.seed.getProductBySlug, {
+        slug,
+      });
       if (!existing || existing.logoStorageId) continue;
 
       const response = await fetch(product.logoImageUrl);

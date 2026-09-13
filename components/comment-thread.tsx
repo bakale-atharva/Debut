@@ -162,7 +162,10 @@ function CommentItem({
         <div className="ml-9 flex flex-col divide-y divide-border border-l border-border pl-4">
           {replies.map((reply) => (
             <div key={reply._id} className="py-3 first:pt-0">
-              <CommentRow comment={reply} onUpvote={() => toggleUpvote({ commentId: reply._id })} />
+              <CommentRow
+                comment={reply}
+                onUpvote={() => toggleUpvote({ commentId: reply._id })}
+              />
             </div>
           ))}
         </div>
@@ -198,7 +201,11 @@ function CommentRow({
 
   return (
     <div className="flex gap-3">
-      <UserAvatar name={comment.authorName} avatarUrl={comment.authorAvatarUrl} size={28} />
+      <UserAvatar
+        name={comment.authorName}
+        avatarUrl={comment.authorAvatarUrl}
+        size={28}
+      />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-medium">{comment.authorName}</span>
@@ -209,9 +216,15 @@ function CommentRow({
             </span>
           )}
         </div>
-        <p className="whitespace-pre-wrap text-sm leading-relaxed">{comment.body}</p>
+        <p className="whitespace-pre-wrap text-sm leading-relaxed">
+          {comment.body}
+        </p>
         <div className="mt-1 flex items-center gap-3">
-          {isSignedIn ? upvoteButton : <SignInButton mode="modal">{upvoteButton}</SignInButton>}
+          {isSignedIn ? (
+            upvoteButton
+          ) : (
+            <SignInButton mode="modal">{upvoteButton}</SignInButton>
+          )}
           {onReply && (
             <button
               onClick={onReply}

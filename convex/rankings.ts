@@ -8,7 +8,11 @@ import {
   weekKeyFor,
   weekRangeFor,
 } from "./lib/utils";
-import { getProductBadges, resolveLogoUrl, withViewerUpvote } from "./lib/productView";
+import {
+  getProductBadges,
+  resolveLogoUrl,
+  withViewerUpvote,
+} from "./lib/productView";
 import type { Doc, Id } from "./_generated/dataModel";
 import type { MutationCtx } from "./_generated/server";
 
@@ -18,7 +22,11 @@ const MAX_RANKED_PER_PERIOD = 50;
 const MAX_CANDIDATES_PER_RANGE = 200;
 
 /** Products launched in [start, end] (inclusive "YYYY-MM-DD" range), ranked by upvoteCount desc. */
-async function rankProductsInRange(ctx: MutationCtx, start: string, end: string) {
+async function rankProductsInRange(
+  ctx: MutationCtx,
+  start: string,
+  end: string,
+) {
   const candidates = await ctx.db
     .query("products")
     .withIndex("by_launchDay_and_upvoteCount", (q) =>
@@ -40,7 +48,9 @@ async function replaceRankings(
 ) {
   const existing = await ctx.db
     .query("dailyRankings")
-    .withIndex("by_period_and_key", (q) => q.eq("period", period).eq("periodKey", periodKey))
+    .withIndex("by_period_and_key", (q) =>
+      q.eq("period", period).eq("periodKey", periodKey),
+    )
     .take(MAX_RANKED_PER_PERIOD);
   for (const row of existing) {
     await ctx.db.delete("dailyRankings", row._id);
@@ -72,11 +82,19 @@ export const snapshotRankings = internalMutation({
     await replaceRankings(ctx, "day", closingDay, dayRanked);
 
     const weekRange = weekRangeFor(closingDay);
-    const weekRanked = await rankProductsInRange(ctx, weekRange.start, weekRange.end);
+    const weekRanked = await rankProductsInRange(
+      ctx,
+      weekRange.start,
+      weekRange.end,
+    );
     await replaceRankings(ctx, "week", weekKeyFor(closingDay), weekRanked);
 
     const monthRange = monthRangeFor(closingDay);
-    const monthRanked = await rankProductsInRange(ctx, monthRange.start, monthRange.end);
+    const monthRanked = await rankProductsInRange(
+      ctx,
+      monthRange.start,
+      monthRange.end,
+    );
     await replaceRankings(ctx, "month", monthKeyFor(closingDay), monthRanked);
   },
 });

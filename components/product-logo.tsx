@@ -41,11 +41,17 @@ export function ProductLogo({
       role="img"
       aria-label={`${name} logo`}
       className={cn(
-        featured && "rounded-[12px] ring-2 ring-signal ring-offset-2 ring-offset-background",
+        featured &&
+          "rounded-[12px] ring-2 ring-signal ring-offset-2 ring-offset-background",
         className,
       )}
     >
-      <rect width="48" height="48" rx="10" fill={`var(--chart-${colorIndex})`} />
+      <rect
+        width="48"
+        height="48"
+        rx="10"
+        fill={`var(--chart-${colorIndex})`}
+      />
       <text
         x="50%"
         y="50%"

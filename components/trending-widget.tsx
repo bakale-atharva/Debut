@@ -12,12 +12,16 @@ export function TrendingWidget() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold text-muted-foreground">Trending now</h2>
+      <h2 className="text-sm font-semibold text-muted-foreground">
+        Trending now
+      </h2>
 
       {products === undefined ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : products.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No trending products yet.</p>
+        <p className="text-sm text-muted-foreground">
+          No trending products yet.
+        </p>
       ) : (
         <div className="flex flex-col divide-y divide-border">
           {products.slice(0, MAX_SHOWN).map((product) => (

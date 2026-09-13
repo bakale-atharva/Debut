@@ -20,7 +20,10 @@ export function UserAvatar({
         width={size}
         height={size}
         style={{ width: size, height: size }}
-        className={cn("shrink-0 rounded-full object-cover ring-2 ring-background", className)}
+        className={cn(
+          "shrink-0 rounded-full object-cover ring-2 ring-background",
+          className,
+        )}
       />
     );
   }

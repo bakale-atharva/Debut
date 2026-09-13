@@ -27,10 +27,15 @@ export function SearchFeed() {
   // URL here — already debounced there before it lands in `q`.
   const term = searchParams.get("q") ?? "";
   const categorySlug = searchParams.get("category") ?? undefined;
-  const pricingType = (searchParams.get("pricing") as PricingType | null) ?? undefined;
+  const pricingType =
+    (searchParams.get("pricing") as PricingType | null) ?? undefined;
   const day = searchParams.get("day") ?? undefined;
 
-  function updateParams(next: { category?: string; pricing?: string; day?: string }) {
+  function updateParams(next: {
+    category?: string;
+    pricing?: string;
+    day?: string;
+  }) {
     const params = new URLSearchParams(searchParams.toString());
     if (next.category !== undefined) {
       if (!next.category) params.delete("category");
@@ -54,7 +59,10 @@ export function SearchFeed() {
     api.search.search,
     term.trim() ? { term: term.trim(), ...filters } : "skip",
   );
-  const trendingResults = useQuery(api.search.trending, term.trim() ? "skip" : filters);
+  const trendingResults = useQuery(
+    api.search.trending,
+    term.trim() ? "skip" : filters,
+  );
 
   const isSearching = term.trim().length > 0;
   const products = isSearching ? searchResults : trendingResults;
@@ -63,7 +71,9 @@ export function SearchFeed() {
     <div className="flex flex-col gap-6 md:flex-row md:items-start">
       <aside className="flex w-full flex-col gap-6 md:w-56 md:shrink-0">
         <div className="flex flex-col gap-1.5">
-          <h2 className="text-sm font-semibold text-muted-foreground">Pricing</h2>
+          <h2 className="text-sm font-semibold text-muted-foreground">
+            Pricing
+          </h2>
           <div className="flex flex-col items-start gap-1">
             {PRICING_OPTIONS.map((option) => (
               <button
@@ -84,7 +94,10 @@ export function SearchFeed() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <h2 id="launch-date-heading" className="text-sm font-semibold text-muted-foreground">
+          <h2
+            id="launch-date-heading"
+            className="text-sm font-semibold text-muted-foreground"
+          >
             Launch date
           </h2>
           <div className="flex flex-col items-start gap-1.5">
@@ -123,7 +136,9 @@ export function SearchFeed() {
 
         {categories !== undefined && categories.length > 0 && (
           <div className="flex flex-col gap-1.5">
-            <h2 className="text-sm font-semibold text-muted-foreground">Category</h2>
+            <h2 className="text-sm font-semibold text-muted-foreground">
+              Category
+            </h2>
             <div className="flex flex-col items-start gap-1">
               <button
                 aria-pressed={categorySlug === undefined}
@@ -166,7 +181,9 @@ export function SearchFeed() {
           <p className="text-muted-foreground">Loading…</p>
         ) : products.length === 0 ? (
           <p className="text-muted-foreground">
-            {isSearching ? "No products match your search." : "No trending products yet."}
+            {isSearching
+              ? "No products match your search."
+              : "No trending products yet."}
           </p>
         ) : (
           <div className="flex flex-col divide-y divide-border">

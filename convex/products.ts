@@ -3,7 +3,11 @@ import { v } from "convex/values";
 import { getOrCreateUser } from "./users";
 import { generateUniqueSlug, todayInIST } from "./lib/utils";
 import { getOrCreateTopic } from "./topics";
-import { getProductBadges, resolveLogoUrl, withViewerUpvote } from "./lib/productView";
+import {
+  getProductBadges,
+  resolveLogoUrl,
+  withViewerUpvote,
+} from "./lib/productView";
 import type { Doc, Id } from "./_generated/dataModel";
 
 const MAX_CATEGORIES_PER_PRODUCT = 3;
@@ -32,7 +36,9 @@ export const create = mutation({
   },
   handler: async (ctx, args) => {
     if (args.categoryIds.length > MAX_CATEGORIES_PER_PRODUCT) {
-      throw new Error(`Choose at most ${MAX_CATEGORIES_PER_PRODUCT} categories`);
+      throw new Error(
+        `Choose at most ${MAX_CATEGORIES_PER_PRODUCT} categories`,
+      );
     }
     if (args.topicNames.length > MAX_TOPICS_PER_PRODUCT) {
       throw new Error(`Add at most ${MAX_TOPICS_PER_PRODUCT} topics`);
@@ -40,7 +46,10 @@ export const create = mutation({
     if (args.makerUserIds.length > MAX_MAKERS_PER_PRODUCT) {
       throw new Error(`Add at most ${MAX_MAKERS_PER_PRODUCT} makers`);
     }
-    if (args.galleryStorageIds && args.galleryStorageIds.length > MAX_GALLERY_IMAGES) {
+    if (
+      args.galleryStorageIds &&
+      args.galleryStorageIds.length > MAX_GALLERY_IMAGES
+    ) {
       throw new Error(`Add at most ${MAX_GALLERY_IMAGES} gallery images`);
     }
 
@@ -112,7 +121,9 @@ export const list = query({
 
     const candidates = await ctx.db
       .query("products")
-      .withIndex("by_launchDay_and_upvoteCount", (q) => q.eq("launchDay", args.day))
+      .withIndex("by_launchDay_and_upvoteCount", (q) =>
+        q.eq("launchDay", args.day),
+      )
       .order("desc")
       .take(200);
 
@@ -166,7 +177,9 @@ export const getBySlug = query({
     );
 
     const galleryUrls = product.galleryStorageIds
-      ? await Promise.all(product.galleryStorageIds.map((id) => ctx.storage.getUrl(id)))
+      ? await Promise.all(
+          product.galleryStorageIds.map((id) => ctx.storage.getUrl(id)),
+        )
       : [];
 
     return {

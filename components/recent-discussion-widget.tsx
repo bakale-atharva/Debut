@@ -19,7 +19,9 @@ export function RecentDiscussionWidget() {
 
   return (
     <div className="flex flex-col gap-3">
-      <h2 className="text-sm font-semibold text-muted-foreground">Recent discussion</h2>
+      <h2 className="text-sm font-semibold text-muted-foreground">
+        Recent discussion
+      </h2>
 
       {comments === undefined ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
@@ -33,10 +35,16 @@ export function RecentDiscussionWidget() {
               href={`/product/${comment.productSlug}`}
               className="flex gap-2.5 py-3 first:pt-0"
             >
-              <UserAvatar name={comment.authorName} avatarUrl={comment.authorAvatarUrl} size={24} />
+              <UserAvatar
+                name={comment.authorName}
+                avatarUrl={comment.authorAvatarUrl}
+                size={24}
+              />
               <div className="min-w-0 flex-1">
                 <p className="text-sm leading-snug">{truncate(comment.body)}</p>
-                <p className="truncate text-xs text-muted-foreground">on {comment.productName}</p>
+                <p className="truncate text-xs text-muted-foreground">
+                  on {comment.productName}
+                </p>
               </div>
             </Link>
           ))}

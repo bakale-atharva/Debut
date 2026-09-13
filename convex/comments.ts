@@ -14,7 +14,9 @@ export const create = mutation({
     const body = args.body.trim();
     if (!body) throw new Error("Comment cannot be empty");
     if (body.length > MAX_COMMENT_LENGTH) {
-      throw new Error(`Comments must be ${MAX_COMMENT_LENGTH} characters or fewer`);
+      throw new Error(
+        `Comments must be ${MAX_COMMENT_LENGTH} characters or fewer`,
+      );
     }
 
     const product = await ctx.db.get("products", args.productId);
@@ -133,7 +135,10 @@ export const toggleUpvote = mutation({
       return { upvoted: false };
     }
 
-    await ctx.db.insert("commentUpvotes", { commentId: args.commentId, userId });
+    await ctx.db.insert("commentUpvotes", {
+      commentId: args.commentId,
+      userId,
+    });
     await ctx.db.patch("comments", args.commentId, {
       upvoteCount: comment.upvoteCount + 1,
     });

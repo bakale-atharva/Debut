@@ -68,6 +68,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
                   size="sm"
                   className="flex rounded-full gap-1"
                   render={<Link href="/submit" />}
+                  nativeButton={false}
                 >
                   <Plus className="size-3.5" />
                   Submit

@@ -26,8 +26,8 @@ type MakerUser = Doc<"users">;
 
 const MAX_CATEGORIES = 3;
 const MAX_TOPICS = 5;
-const MAX_MAKERS = 5;
-const MAX_GALLERY_IMAGES = 5;
+const MAX_MAKERS = 12;
+const MAX_GALLERY_IMAGES = 10;
 
 export default function SubmitPage() {
   const { isSignedIn, isLoaded } = useAuth();

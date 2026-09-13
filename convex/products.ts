@@ -8,8 +8,8 @@ import type { QueryCtx } from "./_generated/server";
 
 const MAX_CATEGORIES_PER_PRODUCT = 3;
 const MAX_TOPICS_PER_PRODUCT = 5;
-const MAX_MAKERS_PER_PRODUCT = 5;
-const MAX_GALLERY_IMAGES = 5;
+const MAX_MAKERS_PER_PRODUCT = 12;
+const MAX_GALLERY_IMAGES = 10;
 const FEATURED_COUNT = 5;
 
 async function withViewerUpvote(ctx: QueryCtx, product: Doc<"products">) {
@@ -26,8 +26,8 @@ async function withViewerUpvote(ctx: QueryCtx, product: Doc<"products">) {
 }
 
 async function resolveLogoUrl(ctx: QueryCtx, product: Doc<"products">) {
-  if (!product.logoStorageId) return null;
-  return await ctx.storage.getUrl(product.logoStorageId);
+  if (!product.logoStorageId) return undefined;
+  return (await ctx.storage.getUrl(product.logoStorageId)) ?? undefined;
 }
 
 export const create = mutation({

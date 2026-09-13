@@ -21,7 +21,7 @@ export function ProductCard({
   rank,
   isTop3,
 }: {
-  product: Doc<"products"> & { viewerHasUpvoted: boolean; logoUrl: string | null };
+  product: Doc<"products"> & { viewerHasUpvoted: boolean; logoUrl: string | undefined };
   rank: number;
   isTop3: boolean;
 }) {

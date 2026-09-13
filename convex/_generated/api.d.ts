@@ -13,6 +13,7 @@ import type * as comments from "../comments.js";
 import type * as files from "../files.js";
 import type * as lib_utils from "../lib/utils.js";
 import type * as products from "../products.js";
+import type * as seed from "../seed.js";
 import type * as topics from "../topics.js";
 import type * as upvotes from "../upvotes.js";
 import type * as users from "../users.js";
@@ -29,6 +30,7 @@ declare const fullApi: ApiFromModules<{
   files: typeof files;
   "lib/utils": typeof lib_utils;
   products: typeof products;
+  seed: typeof seed;
   topics: typeof topics;
   upvotes: typeof upvotes;
   users: typeof users;

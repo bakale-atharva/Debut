@@ -7,6 +7,14 @@ export function todayInIST(): string {
   return new Date(Date.now() + IST_OFFSET_MS).toISOString().slice(0, 10);
 }
 
+/** The date ("YYYY-MM-DD") `daysAgo` days before today, in IST. */
+export function daysAgoInIST(daysAgo: number): string {
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+  return new Date(Date.now() + IST_OFFSET_MS - daysAgo * ONE_DAY_MS)
+    .toISOString()
+    .slice(0, 10);
+}
+
 export function slugify(name: string): string {
   const base = name
     .toLowerCase()

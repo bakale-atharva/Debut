@@ -8,10 +8,10 @@ import { X } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 type PricingType = Doc<"products">["pricingType"];
 
@@ -98,117 +99,136 @@ export default function SubmitPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 py-10">
-      <h1 className="text-2xl font-semibold">Submit a product</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="name">Name</Label>
-          <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
-        </div>
+      <h1 className="text-3xl font-semibold tracking-tight">Add to today&rsquo;s chart</h1>
+      <Card>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
+              <h2 className="text-sm font-semibold text-muted-foreground">Basics</h2>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="name">Name</Label>
+                <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required />
+              </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="tagline">Tagline</Label>
-          <Input
-            id="tagline"
-            value={tagline}
-            onChange={(e) => setTagline(e.target.value)}
-            placeholder="A one-line pitch"
-            required
-          />
-        </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="tagline">Tagline</Label>
+                <Input
+                  id="tagline"
+                  value={tagline}
+                  onChange={(e) => setTagline(e.target.value)}
+                  placeholder="A one-line pitch"
+                  required
+                />
+              </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            rows={5}
-            required
-          />
-        </div>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="description">Description</Label>
+                <Textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={5}
+                  required
+                />
+              </div>
 
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="websiteUrl">Website URL</Label>
-          <Input
-            id="websiteUrl"
-            type="url"
-            value={websiteUrl}
-            onChange={(e) => setWebsiteUrl(e.target.value)}
-            placeholder="https://"
-            required
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="pricingType">Pricing</Label>
-          <Select value={pricingType} onValueChange={(value) => setPricingType(value as PricingType)}>
-            <SelectTrigger id="pricingType" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="free">Free</SelectItem>
-              <SelectItem value="freemium">Freemium</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label>Categories (up to {MAX_CATEGORIES})</Label>
-          <div className="grid grid-cols-2 gap-2">
-            {categories?.map((category) => {
-              const checked = categoryIds.includes(category._id);
-              const disabled = !checked && categoryIds.length >= MAX_CATEGORIES;
-              return (
-                <label
-                  key={category._id}
-                  className="flex items-center gap-2 text-sm data-disabled:opacity-50"
-                  data-disabled={disabled || undefined}
-                >
-                  <Checkbox
-                    checked={checked}
-                    disabled={disabled}
-                    onCheckedChange={(value) => toggleCategory(category._id, value === true)}
-                  />
-                  {category.name}
-                </label>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="topicDraft">Topics (up to {MAX_TOPICS})</Label>
-          <Input
-            id="topicDraft"
-            value={topicDraft}
-            onChange={(e) => setTopicDraft(e.target.value)}
-            onKeyDown={handleTopicKeyDown}
-            onBlur={addTopic}
-            placeholder="Type a topic and press Enter"
-            disabled={topics.length >= MAX_TOPICS}
-          />
-          {topics.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {topics.map((topic) => (
-                <button
-                  key={topic}
-                  type="button"
-                  onClick={() => setTopics((prev) => prev.filter((t) => t !== topic))}
-                  className="flex items-center gap-1 rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
-                >
-                  {topic}
-                  <X className="size-3" />
-                </button>
-              ))}
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="websiteUrl">Website URL</Label>
+                <Input
+                  id="websiteUrl"
+                  type="url"
+                  value={websiteUrl}
+                  onChange={(e) => setWebsiteUrl(e.target.value)}
+                  placeholder="https://"
+                  required
+                />
+              </div>
             </div>
-          )}
-        </div>
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Submitting…" : "Submit"}
-        </Button>
-      </form>
+            <div className="flex flex-col gap-4">
+              <h2 className="text-sm font-semibold text-muted-foreground">Pricing & categories</h2>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="pricingType">Pricing</Label>
+                <Select
+                  value={pricingType}
+                  onValueChange={(value) => setPricingType(value as PricingType)}
+                >
+                  <SelectTrigger id="pricingType" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="freemium">Freemium</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <Label>Categories (up to {MAX_CATEGORIES})</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {categories?.map((category) => {
+                    const checked = categoryIds.includes(category._id);
+                    const disabled = !checked && categoryIds.length >= MAX_CATEGORIES;
+                    return (
+                      <button
+                        key={category._id}
+                        type="button"
+                        aria-pressed={checked}
+                        disabled={disabled}
+                        onClick={() => toggleCategory(category._id, !checked)}
+                        className={cn(
+                          "rounded-full px-2.5 py-1 text-xs font-medium disabled:opacity-50",
+                          checked
+                            ? "bg-primary text-primary-foreground"
+                            : "border border-border text-foreground hover:bg-accent",
+                        )}
+                      >
+                        {category.name}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              <h2 className="text-sm font-semibold text-muted-foreground">Topics</h2>
+              <div className="flex flex-col gap-1.5">
+                <Label htmlFor="topicDraft">Topics (up to {MAX_TOPICS})</Label>
+                <Input
+                  id="topicDraft"
+                  value={topicDraft}
+                  onChange={(e) => setTopicDraft(e.target.value)}
+                  onKeyDown={handleTopicKeyDown}
+                  onBlur={addTopic}
+                  placeholder="Type a topic and press Enter"
+                  disabled={topics.length >= MAX_TOPICS}
+                />
+                {topics.length > 0 && (
+                  <div className="flex flex-wrap gap-1.5">
+                    {topics.map((topic) => (
+                      <button
+                        key={topic}
+                        type="button"
+                        onClick={() => setTopics((prev) => prev.filter((t) => t !== topic))}
+                        className="flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs font-medium text-foreground hover:bg-accent"
+                      >
+                        {topic}
+                        <X className="size-3" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <Button type="submit" disabled={isSubmitting} className="w-full rounded-full">
+              {isSubmitting ? "Listing…" : "List it"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </main>
   );
 }

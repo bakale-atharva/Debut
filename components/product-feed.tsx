@@ -20,12 +20,14 @@ export function ProductFeed() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon-sm" onClick={() => setDay((d) => shiftDate(d, -1))}>
             <ChevronLeft className="size-4" />
           </Button>
-          <p className="min-w-40 text-center text-sm font-medium">{formatDisplayDate(day)}</p>
+          <p className="min-w-32 text-center font-mono text-sm tabular-nums sm:min-w-40">
+            {formatDisplayDate(day)}
+          </p>
           <Button
             variant="outline"
             size="icon-sm"
@@ -40,7 +42,7 @@ export function ProductFeed() {
           <button
             className={cn(
               "rounded-md px-3 py-1 text-sm font-medium",
-              !featuredOnly && "bg-background shadow-sm",
+              !featuredOnly && "bg-primary text-primary-foreground",
             )}
             onClick={() => setFeaturedOnly(false)}
           >
@@ -49,7 +51,7 @@ export function ProductFeed() {
           <button
             className={cn(
               "rounded-md px-3 py-1 text-sm font-medium",
-              featuredOnly && "bg-background shadow-sm",
+              featuredOnly && "bg-primary text-primary-foreground",
             )}
             onClick={() => setFeaturedOnly(true)}
           >
@@ -66,7 +68,7 @@ export function ProductFeed() {
               "rounded-full px-2.5 py-1 text-xs font-medium",
               categorySlug === undefined
                 ? "bg-primary text-primary-foreground"
-                : "bg-secondary text-secondary-foreground",
+                : "border border-border text-foreground hover:bg-accent",
             )}
           >
             All categories
@@ -79,7 +81,7 @@ export function ProductFeed() {
                 "rounded-full px-2.5 py-1 text-xs font-medium",
                 categorySlug === category.slug
                   ? "bg-primary text-primary-foreground"
-                  : "bg-secondary text-secondary-foreground",
+                  : "border border-border text-foreground hover:bg-accent",
               )}
             >
               {category.name}
@@ -93,9 +95,9 @@ export function ProductFeed() {
       ) : products.length === 0 ? (
         <p className="text-muted-foreground">No products match these filters.</p>
       ) : (
-        <div className="flex flex-col gap-3">
-          {products.map((product) => (
-            <ProductCard key={product._id} product={product} />
+        <div className="flex flex-col divide-y divide-border">
+          {products.map((product, i) => (
+            <ProductCard key={product._id} product={product} rank={i + 1} isTop3={i < 3} />
           ))}
         </div>
       )}

@@ -4,7 +4,7 @@ import { use } from "react";
 import Link from "next/link";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
-import { ArrowUp } from "lucide-react";
+import { ArrowLeft, ArrowUp, ExternalLink } from "lucide-react";
 import { api } from "@/convex/_generated/api";
 import type { Doc } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,8 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
 
   const upvoteButton = (
     <Button
-      variant={product.viewerHasUpvoted ? "default" : "outline"}
+      variant={product.viewerHasUpvoted ? "boost" : "outline"}
+      className="rounded-full gap-1.5 font-mono tabular-nums"
       onClick={() => toggleUpvote({ productId: product._id })}
     >
       <ArrowUp className="size-4" />
@@ -42,14 +43,23 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 py-10">
-      <Link href="/" className="text-sm text-muted-foreground">
-        ← Back
+      <Link
+        href="/"
+        className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+      >
+        <ArrowLeft className="size-3.5" />
+        Back
       </Link>
 
       <div className="flex items-start gap-4">
-        <ProductLogo seed={product.logoSeed} name={product.name} size={64} />
+        <ProductLogo
+          seed={product.logoSeed}
+          name={product.name}
+          size={64}
+          featured={product.isFeatured}
+        />
         <div className="flex-1">
-          <h1 className="text-2xl font-semibold">{product.name}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{product.name}</h1>
           <p className="text-muted-foreground">{product.tagline}</p>
         </div>
         {isSignedIn ? upvoteButton : <SignInButton mode="modal">{upvoteButton}</SignInButton>}
@@ -63,20 +73,23 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
           href={product.websiteUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="font-medium underline underline-offset-4"
+          className="flex items-center gap-1 font-medium underline underline-offset-4"
         >
-          Visit website ↗
+          Visit website
+          <ExternalLink className="size-3.5" />
         </a>
       </div>
 
-      <p className="whitespace-pre-wrap text-sm leading-relaxed">{product.description}</p>
+      <p className="max-w-prose whitespace-pre-wrap text-sm leading-relaxed">
+        {product.description}
+      </p>
 
       {(product.categories.length > 0 || product.topics.length > 0) && (
         <div className="flex flex-wrap gap-1.5">
           {product.categories.map((category) => (
             <span
               key={category._id}
-              className="rounded-full bg-primary px-2 py-0.5 text-xs text-primary-foreground"
+              className="rounded-full bg-primary px-2.5 py-1 text-xs font-medium text-primary-foreground"
             >
               {category.name}
             </span>
@@ -84,7 +97,7 @@ export default function ProductPage({ params }: PageProps<"/product/[slug]">) {
           {product.topics.map((topic) => (
             <span
               key={topic._id}
-              className="rounded-full bg-secondary px-2 py-0.5 text-xs text-secondary-foreground"
+              className="rounded-full border border-border px-2.5 py-1 text-xs font-medium text-foreground"
             >
               #{topic.name}
             </span>
